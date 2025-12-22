@@ -1,0 +1,343 @@
+* {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        }
+        
+        body {
+            background-color: #f5f7fa;
+            color: #333;
+            line-height: 1.6;
+        }
+        
+        .container {
+            max-width: 1400px;
+            margin: 0 auto;
+            padding: 20px;
+        }
+        
+        header {
+            background: linear-gradient(135deg, #1a2a6c, #2a5298);
+            color: white;
+            padding: 2rem 0;
+            border-radius: 0 0 10px 10px;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+            margin-bottom: 2rem;
+        }
+        
+        .header-content {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        
+        .logo {
+            display: flex;
+            align-items: center;
+            gap: 15px;
+        }
+        
+        .logo-icon {
+            font-size: 2.5rem;
+            color: #4CAF50;
+        }
+        
+        h1 {
+            font-size: 2.5rem;
+            margin-bottom: 0.5rem;
+        }
+        
+        .tagline {
+            font-size: 1.1rem;
+            opacity: 0.9;
+        }
+        
+        .navigation {
+            margin-bottom: 2rem;
+            text-align: center;
+        }
+        
+        .nav-link {
+            display: inline-block;
+            margin: 0 10px;
+            color: #2a5298;
+            text-decoration: none;
+            font-weight: 600;
+            padding: 8px 16px;
+            border-radius: 5px;
+            transition: all 0.3s;
+        }
+        
+        .nav-link:hover {
+            background-color: #e3f2fd;
+        }
+        
+        .nav-link.active {
+            background-color: #2a5298;
+            color: white;
+        }
+        
+        .card {
+            background-color: white;
+            border-radius: 10px;
+            padding: 1.5rem;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
+            margin-bottom: 1.5rem;
+        }
+        
+        .card h2 {
+            color: #2a5298;
+            margin-bottom: 1rem;
+            padding-bottom: 0.5rem;
+            border-bottom: 2px solid #f0f0f0;
+        }
+        
+        .form-group {
+            margin-bottom: 1.2rem;
+        }
+        
+        label {
+            display: block;
+            margin-bottom: 0.5rem;
+            font-weight: 600;
+            color: #444;
+        }
+        
+        input, select, textarea {
+            width: 100%;
+            padding: 0.8rem;
+            border: 1px solid #ddd;
+            border-radius: 5px;
+            font-size: 1rem;
+            transition: border 0.3s;
+        }
+        
+        input:focus, select:focus, textarea:focus {
+            border-color: #2a5298;
+            outline: none;
+        }
+        
+        .btn {
+            background-color: #2a5298;
+            color: white;
+            border: none;
+            padding: 0.8rem 1.5rem;
+            border-radius: 5px;
+            font-size: 1rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: background-color 0.3s;
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+        }
+        
+        .btn:hover {
+            background-color: #1a3a78;
+        }
+        
+        .btn-green {
+            background-color: #4CAF50;
+        }
+        
+        .btn-green:hover {
+            background-color: #3d8b40;
+        }
+        
+        .btn-red {
+            background-color: #e53935;
+        }
+        
+        .btn-red:hover {
+            background-color: #c62828;
+        }
+        
+        .btn-orange {
+            background-color: #FF9800;
+        }
+        
+        .btn-orange:hover {
+            background-color: #F57C00;
+        }
+        
+        .outcome-row {
+            display: flex;
+            gap: 15px;
+            margin-bottom: 15px;
+            align-items: center;
+        }
+        
+        .outcome-name {
+            flex: 1;
+        }
+        
+        .bookmaker-odds {
+            display: flex;
+            gap: 10px;
+            flex-wrap: wrap;
+        }
+        
+        .odds-input {
+            width: 80px;
+            text-align: center;
+        }
+        
+        .bookmaker-tag {
+            display: inline-block;
+            background-color: #e3f2fd;
+            color: #1565c0;
+            padding: 3px 8px;
+            border-radius: 4px;
+            font-size: 0.85rem;
+            margin-left: 5px;
+            font-weight: 600;
+        }
+        
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin: 1.5rem 0;
+        }
+        
+        th, td {
+            padding: 12px 15px;
+            text-align: left;
+            border-bottom: 1px solid #eee;
+        }
+        
+        th {
+            background-color: #f8f9fa;
+            font-weight: 700;
+            color: #333;
+        }
+        
+        tr:hover {
+            background-color: #f9f9f9;
+        }
+        
+        .positive {
+            color: #4CAF50;
+            font-weight: 600;
+        }
+        
+        .negative {
+            color: #e53935;
+            font-weight: 600;
+        }
+        
+        .info-box {
+            background-color: #e8f5e9;
+            border-left: 4px solid #4CAF50;
+            padding: 1rem;
+            margin: 1.5rem 0;
+            border-radius: 0 5px 5px 0;
+        }
+        
+        .warning-box {
+            background-color: #fff3e0;
+            border-left: 4px solid #ff9800;
+            padding: 1rem;
+            margin: 1.5rem 0;
+            border-radius: 0 5px 5px 0;
+        }
+        
+        .bookmaker-comparison {
+            display: flex;
+            justify-content: space-between;
+            margin-top: 1.5rem;
+            flex-wrap: wrap;
+            gap: 1rem;
+        }
+        
+        .bookmaker-card {
+            flex: 1;
+            min-width: 200px;
+            background-color: white;
+            border-radius: 8px;
+            padding: 1.2rem;
+            text-align: center;
+            box-shadow: 0 3px 10px rgba(0,0,0,0.05);
+            border-top: 4px solid;
+        }
+        
+        .bookmaker-card.fanduel {
+            border-color: #00C853;
+        }
+        
+        .bookmaker-card.bet365 {
+            border-color: #1E88E5;
+        }
+        
+        .bookmaker-card.betonline {
+            border-color: #FF9800;
+        }
+        
+        .bookmaker-card.pinnacle {
+            border-color: #9C27B0;
+        }
+        
+        footer {
+            text-align: center;
+            padding: 2rem 0;
+            margin-top: 3rem;
+            color: #666;
+            border-top: 1px solid #eee;
+        }
+
+        .bookmaker-link {
+    text-decoration: none;
+    color: inherit;
+    display: block;
+    transition: transform 0.3s ease;
+    }
+
+    .bookmaker-link:hover {
+        transform: translateY(-5px);
+    }
+
+    .bookmaker-card {
+        cursor: pointer;
+        transition: all 0.3s ease;
+    }
+
+    .bookmaker-card:hover {
+        box-shadow: 0 6px 20px rgba(0, 0, 0, 0.15);
+    }
+
+    .visit-link {
+        display: inline-block;
+        margin-top: 10px;
+        padding: 5px 10px;
+        background-color: rgba(255, 255, 255, 0.2);
+        border-radius: 4px;
+        font-size: 0.8rem;
+        text-decoration: none;
+        color: inherit;
+        transition: background-color 0.3s;
+    }
+
+    .bookmaker-card:hover .visit-link {
+        background-color: rgba(255, 255, 255, 0.3);
+    }
+        
+        @media (max-width: 768px) {
+            .header-content {
+                flex-direction: column;
+                text-align: center;
+                gap: 1rem;
+            }
+            
+            .bookmaker-comparison {
+                flex-direction: column;
+            }
+            
+            .outcome-row {
+                flex-direction: column;
+                align-items: flex-start;
+            }
+            
+            .bookmaker-odds {
+                width: 100%;
+            }
+        }

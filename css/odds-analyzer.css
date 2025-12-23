@@ -14,6 +14,14 @@ body {
     margin: 0 auto;
 }
 
+/* Bookmaker Header Styles */
+.bookmaker-header {
+    display: flex;
+    gap: 8px;
+    margin-bottom: 8px;
+    margin-left: calc(150px + 12px); /* Match the outcome-name width + gap */
+}
+
 /* Outcome Row Styles */
 .outcome-row {
     display: flex;
@@ -129,6 +137,12 @@ body {
         flex-direction: column;
         text-align: center;
         gap: 1rem;
+    }
+    
+    .bookmaker-header {
+        margin-left: 0;
+        justify-content: space-between;
+        padding: 0 4px;
     }
     
     .outcome-row {
@@ -329,3 +343,4 @@ input:focus, select:focus, textarea:focus {
     border: 1px solid #326744 !important;
     color: #ffffff !important;
 }
+

@@ -344,3 +344,56 @@ input:focus, select:focus, textarea:focus {
     color: #ffffff !important;
 }
 
+/* Copy tooltip styles */
+.copy-tooltip {
+    position: absolute;
+    top: -40px;
+    left: 50%;
+    transform: translateX(-50%) translateY(10px);
+    background: linear-gradient(135deg, #1e293b, #334155);
+    color: white;
+    padding: 8px 12px;
+    border-radius: 6px;
+    font-size: 12px;
+    font-weight: 600;
+    white-space: nowrap;
+    opacity: 0;
+    visibility: hidden;
+    transition: all 0.3s cubic-bezier(0.68, -0.55, 0.265, 1.55);
+    z-index: 1000;
+    pointer-events: none;
+    font-family: 'Lexend', sans-serif;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+    border: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+.dark .copy-tooltip {
+    background: linear-gradient(135deg, #13ec5b, #0fa848);
+    color: #102216;
+    border: 1px solid rgba(255, 255, 255, 0.2);
+}
+
+/* Copyable cells */
+td.copy-enabled {
+    cursor: pointer;
+    position: relative;
+    transition: background-color 0.2s ease;
+    padding: 12px 15px !important;
+}
+
+td.copy-enabled:hover {
+    background-color: rgba(19, 236, 91, 0.15) !important;
+}
+
+/* Mobile responsive */
+@media (max-width: 768px) {
+    .copy-tooltip {
+        font-size: 11px;
+        padding: 6px 10px;
+        top: -35px;
+    }
+    
+    td.copy-enabled {
+        padding: 10px 12px !important;
+    }
+}

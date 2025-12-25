@@ -574,6 +574,10 @@ function updateDetailedStats() {
     const homeStats = teamData.find(t => t.Squad === homeTeam);
     const awayStats = teamData.find(t => t.Squad === awayTeam);
     
+    // Update team labels
+    document.getElementById('homeTeamLabel').textContent = `${homeTeam} Stats`;
+    document.getElementById('awayTeamLabel').textContent = `${awayTeam} Stats`;
+    
     if (homeStats) {
         document.getElementById('homeMP').textContent = homeStats.MP || '-';
         document.getElementById('homeW').textContent = homeStats.W || '-';

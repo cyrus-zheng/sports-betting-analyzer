@@ -547,38 +547,56 @@
                         <!-- Team Stats -->
                         <div id="teamStats" style="display: none;">
                             <h3 class="text-lg font-bold text-slate-900 dark:text-white mb-4">Team Statistics</h3>
-                            <div class="stats-grid grid grid-cols-2 gap-3">
-                                <div class="stat-card bg-primary/5 border border-primary/10 rounded-lg p-3 text-center">
-                                    <div class="value text-primary font-bold text-xl" id="homeMP">-</div>
-                                    <div class="label text-slate-600 dark:text-slate-400 text-xs">Matches</div>
+                            
+                            <!-- Home Team Stats -->
+                            <div class="mb-6">
+                                <div class="flex items-center gap-2 mb-3">
+                                    <div class="w-3 h-3 rounded-full bg-primary"></div>
+                                    <h4 id="homeTeamLabel" class="font-bold text-slate-900 dark:text-white">Home Team Stats</h4>
                                 </div>
-                                <div class="stat-card bg-primary/5 border border-primary/10 rounded-lg p-3 text-center">
-                                    <div class="value text-primary font-bold text-xl" id="homeW">-</div>
-                                    <div class="label text-slate-600 dark:text-slate-400 text-xs">Wins</div>
+                                <div class="stats-grid grid grid-cols-4 gap-2">
+                                    <div class="stat-card bg-primary/5 border border-primary/10 rounded-lg p-3 text-center">
+                                        <div class="value text-primary font-bold text-xl" id="homeMP">-</div>
+                                        <div class="label text-slate-600 dark:text-slate-400 text-xs">Matches</div>
+                                    </div>
+                                    <div class="stat-card bg-primary/5 border border-primary/10 rounded-lg p-3 text-center">
+                                        <div class="value text-primary font-bold text-xl" id="homeW">-</div>
+                                        <div class="label text-slate-600 dark:text-slate-400 text-xs">Wins</div>
+                                    </div>
+                                    <div class="stat-card bg-primary/5 border border-primary/10 rounded-lg p-3 text-center">
+                                        <div class="value text-primary font-bold text-xl" id="homeGF">-</div>
+                                        <div class="label text-slate-600 dark:text-slate-400 text-xs">Goals For</div>
+                                    </div>
+                                    <div class="stat-card bg-primary/5 border border-primary/10 rounded-lg p-3 text-center">
+                                        <div class="value text-primary font-bold text-xl" id="homeGA">-</div>
+                                        <div class="label text-slate-600 dark:text-slate-400 text-xs">Goals Against</div>
+                                    </div>
                                 </div>
-                                <div class="stat-card bg-primary/5 border border-primary/10 rounded-lg p-3 text-center">
-                                    <div class="value text-primary font-bold text-xl" id="homeGF">-</div>
-                                    <div class="label text-slate-600 dark:text-slate-400 text-xs">Goals For</div>
+                            </div>
+                            
+                            <!-- Away Team Stats -->
+                            <div>
+                                <div class="flex items-center gap-2 mb-3">
+                                    <div class="w-3 h-3 rounded-full bg-red-500"></div>
+                                    <h4 id="awayTeamLabel" class="font-bold text-slate-900 dark:text-white">Away Team Stats</h4>
                                 </div>
-                                <div class="stat-card bg-primary/5 border border-primary/10 rounded-lg p-3 text-center">
-                                    <div class="value text-primary font-bold text-xl" id="homeGA">-</div>
-                                    <div class="label text-slate-600 dark:text-slate-400 text-xs">Goals Against</div>
-                                </div>
-                                <div class="stat-card bg-primary/5 border border-primary/10 rounded-lg p-3 text-center">
-                                    <div class="value text-primary font-bold text-xl" id="awayMP">-</div>
-                                    <div class="label text-slate-600 dark:text-slate-400 text-xs">Matches</div>
-                                </div>
-                                <div class="stat-card bg-primary/5 border border-primary/10 rounded-lg p-3 text-center">
-                                    <div class="value text-primary font-bold text-xl" id="awayW">-</div>
-                                    <div class="label text-slate-600 dark:text-slate-400 text-xs">Wins</div>
-                                </div>
-                                <div class="stat-card bg-primary/5 border border-primary/10 rounded-lg p-3 text-center">
-                                    <div class="value text-primary font-bold text-xl" id="awayGF">-</div>
-                                    <div class="label text-slate-600 dark:text-slate-400 text-xs">Goals For</div>
-                                </div>
-                                <div class="stat-card bg-primary/5 border border-primary/10 rounded-lg p-3 text-center">
-                                    <div class="value text-primary font-bold text-xl" id="awayGA">-</div>
-                                    <div class="label text-slate-600 dark:text-slate-400 text-xs">Goals Against</div>
+                                <div class="stats-grid grid grid-cols-4 gap-2">
+                                    <div class="stat-card bg-red-500/5 border border-red-500/10 rounded-lg p-3 text-center">
+                                        <div class="value text-red-500 font-bold text-xl" id="awayMP">-</div>
+                                        <div class="label text-slate-600 dark:text-slate-400 text-xs">Matches</div>
+                                    </div>
+                                    <div class="stat-card bg-red-500/5 border border-red-500/10 rounded-lg p-3 text-center">
+                                        <div class="value text-red-500 font-bold text-xl" id="awayW">-</div>
+                                        <div class="label text-slate-600 dark:text-slate-400 text-xs">Wins</div>
+                                    </div>
+                                    <div class="stat-card bg-red-500/5 border border-red-500/10 rounded-lg p-3 text-center">
+                                        <div class="value text-red-500 font-bold text-xl" id="awayGF">-</div>
+                                        <div class="label text-slate-600 dark:text-slate-400 text-xs">Goals For</div>
+                                    </div>
+                                    <div class="stat-card bg-red-500/5 border border-red-500/10 rounded-lg p-3 text-center">
+                                        <div class="value text-red-500 font-bold text-xl" id="awayGA">-</div>
+                                        <div class="label text-slate-600 dark:text-slate-400 text-xs">Goals Against</div>
+                                    </div>
                                 </div>
                             </div>
                         </div>

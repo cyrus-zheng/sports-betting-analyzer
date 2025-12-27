@@ -19,7 +19,7 @@ const LEAGUE_NAMES = {
 document.addEventListener('DOMContentLoaded', () => {
     setupFileUploads();
     updateWeightDisplay();
-    setupLeagueSelection();
+    setupAutoProcessing();
     
     // Load from localStorage if available
     loadFromLocalStorage();
@@ -28,14 +28,25 @@ document.addEventListener('DOMContentLoaded', () => {
     const modelWeight = document.getElementById('modelWeight');
     modelWeight.addEventListener('input', updateWeightDisplay);
     
-    // Set up event listeners for buttons
-    document.getElementById('processDataBtn').addEventListener('click', processCSVData);
     document.getElementById('predictBtn').addEventListener('click', generatePrediction);
     document.getElementById('clearDataBtn').addEventListener('click', clearAllData);
     
     // Set up team selection listeners
     document.getElementById('homeTeam').addEventListener('change', updateTeamDisplays);
     document.getElementById('awayTeam').addEventListener('change', updateTeamDisplays);
+    
+    // Set up file change listener for custom CSV
+    document.getElementById('csvFile').addEventListener('change', function(e) {
+        if (e.target.files.length > 0) {
+            csvFile = e.target.files[0];
+            updateFileList(document.getElementById('fileList'), csvFile);
+            
+            if (selectedLeague === 'custom') {
+                // Auto-process custom CSV file
+                setTimeout(() => processSelectedLeague(), 500);
+            }
+        }
+    });
 });
 
 // ======================
@@ -61,10 +72,10 @@ function showNotification(message, type = 'info') {
     const notification = document.createElement('div');
     notification.className = `notification ${type}`;
     notification.innerHTML = `
-        <div style="position: fixed; top: 20px; right: 20px; background-color: ${type === 'error' ? '#f44336' : type === 'warning' ? '#ff9800' : '#4CAF50'}; 
+        <div style="position: fixed; top: 20px; right: 20px; background-color: ${type === 'error' ? '#f44336' : type === 'warning' ? '#ff9800' : type === 'success' ? '#4CAF50' : '#2196f3'}; 
                     color: white; padding: 15px 20px; border-radius: 5px; box-shadow: 0 4px 12px rgba(0,0,0,0.15); 
                     z-index: 1000; display: flex; align-items: center; gap: 10px; animation: slideIn 0.3s ease;">
-            <i class="fas fa-${type === 'error' ? 'exclamation-circle' : type === 'warning' ? 'exclamation-triangle' : 'check-circle'}"></i>
+            <i class="fas fa-${type === 'error' ? 'exclamation-circle' : type === 'warning' ? 'exclamation-triangle' : type === 'success' ? 'check-circle' : 'info-circle'}"></i>
             ${message}
         </div>
     `;
@@ -86,6 +97,120 @@ function showNotification(message, type = 'info') {
 }
 
 // ======================
+// AUTO-PROCESSING FUNCTIONS
+// ======================
+
+function setupAutoProcessing() {
+    const leagueOptions = document.querySelectorAll('.league-option');
+    
+    leagueOptions.forEach(option => {
+        option.addEventListener('click', async () => {
+            const league = option.dataset.league;
+            
+            // Remove active class from all options
+            leagueOptions.forEach(opt => {
+                opt.classList.remove('active');
+                opt.querySelector('.league-check').style.display = 'none';
+            });
+            
+            // Add active class to selected option
+            option.classList.add('active');
+            option.querySelector('.league-check').style.display = 'inline-block';
+            
+            // Set selected league
+            selectedLeague = league;
+            
+            // Update league info with loading state
+            updateLeagueInfo(league);
+            
+            // Handle CSV upload visibility
+            const csvUploadCard = document.getElementById('csvUploadCard');
+            if (selectedLeague === 'custom') {
+                csvUploadCard.style.display = 'block';
+                showNotification('Upload a CSV file to proceed', 'info');
+            } else {
+                csvUploadCard.style.display = 'none';
+                // Auto-process the league data
+                await processSelectedLeague();
+            }
+        });
+    });
+    
+    // Set custom as default
+    const customOption = document.querySelector('.league-option[data-league="custom"]');
+    if (customOption) {
+        customOption.click();
+    }
+}
+
+// Update league info with loading state
+function updateLeagueInfo(league = null) {
+    const leagueInfo = document.getElementById('leagueInfo');
+    const leagueName = document.getElementById('selectedLeagueName');
+    const leagueStats = document.getElementById('selectedLeagueStats');
+    const loadingSpinner = document.getElementById('loadingSpinner');
+    const infoIcon = document.getElementById('infoIcon');
+    
+    if (league) {
+        leagueInfo.style.display = 'flex';
+        
+        if (league === 'custom') {
+            leagueName.textContent = 'Custom CSV Selected';
+            leagueStats.textContent = 'Upload a CSV file with team statistics';
+            infoIcon.style.display = 'block';
+            loadingSpinner.style.display = 'none';
+        } else {
+            leagueName.textContent = `Loading ${LEAGUE_NAMES[league]}...`;
+            leagueStats.textContent = 'Processing CSV data...';
+            infoIcon.style.display = 'none';
+            loadingSpinner.style.display = 'block';
+        }
+    } else {
+        leagueInfo.style.display = 'none';
+    }
+}
+
+// Function to auto-process selected league
+async function processSelectedLeague() {
+    console.log(`Auto-processing league: ${selectedLeague}`);
+    
+    // Update league info to show loading
+    updateLeagueInfo(selectedLeague);
+    
+    try {
+        // Call the existing processCSVData function
+        await processCSVData();
+        
+        // Update league info to show success
+        const leagueInfo = document.getElementById('leagueInfo');
+        const leagueName = document.getElementById('selectedLeagueName');
+        const leagueStats = document.getElementById('selectedLeagueStats');
+        const loadingSpinner = document.getElementById('loadingSpinner');
+        const infoIcon = document.getElementById('infoIcon');
+        
+        if (selectedLeague === 'custom') {
+            leagueName.textContent = 'Custom CSV Loaded';
+        } else {
+            leagueName.textContent = `${LEAGUE_NAMES[selectedLeague]} Loaded`;
+        }
+        leagueStats.textContent = `${teamData.length} teams successfully loaded`;
+        infoIcon.style.display = 'block';
+        loadingSpinner.style.display = 'none';
+        
+        const leagueNameDisplay = selectedLeague === 'custom' ? 'Custom CSV' : LEAGUE_NAMES[selectedLeague];
+        showNotification(`${leagueNameDisplay} data loaded successfully!`, 'success');
+        
+    } catch (error) {
+        console.error('Error auto-processing league:', error);
+        showNotification(`Error loading league data: ${error.message}`, 'error');
+        
+        // Reset league selection on error
+        selectedLeague = null;
+        updateLeagueInfo();
+    }
+}
+
+// ======================
 // FILE UPLOAD FUNCTIONS
 // ======================
 
@@ -104,8 +229,12 @@ function setupFileUploads() {
         if (e.target.files.length > 0) {
             csvFile = e.target.files[0];
             updateFileList(fileList, csvFile);
-            checkFileReady();
             showNotification('CSV file uploaded successfully', 'success');
+            
+            // Auto-process if custom is selected
+            if (selectedLeague === 'custom') {
+                setTimeout(() => processSelectedLeague(), 500);
+            }
         }
     });
     
@@ -150,8 +279,12 @@ function setupDragAndDrop(uploadArea, fileList) {
             if (file.type === 'text/csv' || file.name.endsWith('.csv')) {
                 csvFile = file;
                 updateFileList(fileList, file);
-                checkFileReady();
                 showNotification('CSV file uploaded successfully', 'success');
+                
+                if (selectedLeague === 'custom') {
+                    // Auto-process custom CSV file
+                    setTimeout(() => processSelectedLeague(), 500);
+                }
             } else {
                 showNotification('Please upload a CSV file', 'error');
             }
@@ -173,93 +306,6 @@ function updateFileList(fileListElement, file) {
 }
 
 // ======================
-// LEAGUE SELECTION FUNCTIONS
-// ======================
-
-function setupLeagueSelection() {
-    const leagueOptions = document.querySelectorAll('.league-option');
-    
-    leagueOptions.forEach(option => {
-        option.addEventListener('click', () => {
-            // Remove active class from all options
-            leagueOptions.forEach(opt => {
-                opt.classList.remove('active');
-                opt.querySelector('.league-check').style.display = 'none';
-            });
-            
-            // Add active class to selected option
-            option.classList.add('active');
-            option.querySelector('.league-check').style.display = 'inline-block';
-            
-            // Set selected league
-            selectedLeague = option.dataset.league;
-            
-            // Update league info display
-            updateLeagueInfo();
-            
-            // Handle CSV upload visibility
-            const csvUploadCard = document.getElementById('csvUploadCard');
-            if (selectedLeague === 'custom') {
-                csvUploadCard.style.display = 'block';
-            } else {
-                csvUploadCard.style.display = 'none';
-            }
-            
-            // Check if button should be enabled
-            checkFileReady();
-        });
-    });
-    
-    // Set custom as default
-    const customOption = document.querySelector('.league-option[data-league="custom"]');
-    if (customOption) {
-        customOption.click();
-    }
-}
-
-function updateLeagueInfo() {
-    const leagueInfo = document.getElementById('leagueInfo');
-    const leagueName = document.getElementById('selectedLeagueName');
-    const leagueStats = document.getElementById('selectedLeagueStats');
-    
-    if (selectedLeague) {
-        leagueInfo.style.display = 'flex';
-        leagueName.textContent = LEAGUE_NAMES[selectedLeague];
-        
-        if (selectedLeague === 'custom') {
-            leagueStats.textContent = 'Upload your own CSV file';
-        } else {
-            const fileMap = {
-                laliga: 'laligateams.csv',
-                premierleague: 'premierleagueteams.csv',
-                seriea: 'serieateams.csv',
-                bundesliga: 'bundesligateams.csv'
-            };
-            leagueStats.textContent = `Will load: ${fileMap[selectedLeague]}`;
-        }
-    } else {
-        leagueInfo.style.display = 'none';
-    }
-}
-
-function checkFileReady() {
-    const processBtn = document.getElementById('processDataBtn');
-    if (selectedLeague && selectedLeague !== 'custom') {
-        // Pre-loaded league selected - enable button
-        processBtn.disabled = false;
-        processBtn.innerHTML = '<i class="fas fa-cogs"></i> Process League Data';
-    } else if (selectedLeague === 'custom' && csvFile) {
-        // Custom selected with file uploaded - enable button
-        processBtn.disabled = false;
-        processBtn.innerHTML = '<i class="fas fa-cogs"></i> Process CSV Data';
-    } else {
-        // Not ready - disable button
-        processBtn.disabled = true;
-        processBtn.innerHTML = '<i class="fas fa-cogs"></i> Process Data';
-    }
-}
-
-// ======================
 // DATA PROCESSING FUNCTIONS
 // ======================
 
@@ -268,12 +314,9 @@ async function processCSVData() {
     console.log('Selected League:', selectedLeague);
     
     const loadingIndicator = document.getElementById('loadingIndicator');
-    const processBtn = document.getElementById('processDataBtn');
     
     // Show loading indicator
     loadingIndicator.style.display = 'block';
-    processBtn.disabled = true;
-    processBtn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Processing...';
     
     try {
         let csvText;
@@ -351,9 +394,6 @@ async function processCSVData() {
         // Save to localStorage
         saveToLocalStorage();
         
-        const leagueName = selectedLeague === 'custom' ? fileName : LEAGUE_NAMES[selectedLeague];
-        showNotification(`Successfully loaded ${teamData.length} teams from ${leagueName}`, 'success');
-        
     } catch (error) {
         console.error('Error processing CSV data:', error);
         showNotification(`Error: ${error.message}`, 'error');
@@ -363,9 +403,6 @@ async function processCSVData() {
     } finally {
         // Hide loading indicator
         loadingIndicator.style.display = 'none';
-        processBtn.disabled = false;
-        processBtn.innerHTML = '<i class="fas fa-cogs"></i> Process Data';
-        checkFileReady();
     }
 }
 
@@ -537,6 +574,10 @@ function updateDetailedStats() {
     const homeStats = teamData.find(t => t.Squad === homeTeam);
     const awayStats = teamData.find(t => t.Squad === awayTeam);
     
+    // Update team labels
+    document.getElementById('homeTeamLabel').textContent = `${homeTeam} Stats`;
+    document.getElementById('awayTeamLabel').textContent = `${awayTeam} Stats`;
+    
     if (homeStats) {
         document.getElementById('homeMP').textContent = homeStats.MP || '-';
         document.getElementById('homeW').textContent = homeStats.W || '-';
@@ -687,7 +728,96 @@ function calculateBettingProbabilities(homeOdds, drawOdds, awayOdds) {
     };
 }
 
-// Improved model with better home/away balance
+// ======================
+// LEAGUE STATS CALCULATION
+// ======================
+
+function calculateLeagueAverages(teamData) {
+    if (!teamData || teamData.length === 0) {
+        return {
+            avgGoalsPerGame: 2.7,
+            avgGoalsPerTeam: 1.35,
+            avgxGPerGame: 1.5,
+            avgxGAPerGame: 1.5
+        };
+    }
+    
+    // FIX: Calculate total matches correctly (each match involves 2 teams)
+    const totalMatchesPlayed = teamData.reduce((sum, team) => sum + (team.MP || 0), 0);
+    const totalMatches = totalMatchesPlayed / 2; // Divide by 2 since each match is counted twice
+    
+    // Calculate total goals scored across all teams
+    const totalGoalsScored = teamData.reduce((sum, team) => sum + (team.GF || 0), 0);
+    
+    // Calculate totals for xG and xGA
+    const totalxG = teamData.reduce((sum, team) => sum + (team.xG || 0), 0);
+    const totalxGA = teamData.reduce((sum, team) => sum + (team.xGA || 0), 0);
+    
+    // CORRECTED AVERAGES PER GAME
+    const avgGoalsPerGame = totalMatches > 0 ? totalGoalsScored / totalMatches : 2.7;
+    const avgGoalsPerTeam = avgGoalsPerGame / 2; // Each team scores half the goals in a match on average
+    const avgxGPerGame = totalMatches > 0 ? totalxG / totalMatches : 1.5;
+    const avgxGAPerGame = totalMatches > 0 ? totalxGA / totalMatches : 1.5;
+    
+    console.log('CORRECTED League Averages (PER GAME):', {
+        totalMatches: totalMatches.toFixed(0),
+        avgGoalsPerGame: avgGoalsPerGame.toFixed(2),
+        avgGoalsPerTeam: avgGoalsPerTeam.toFixed(2),
+        avgxGPerGame: avgxGPerGame.toFixed(2),
+        avgxGAPerGame: avgxGAPerGame.toFixed(2)
+    });
+    
+    return {
+        avgGoalsPerGame,
+        avgGoalsPerTeam,
+        avgxGPerGame,
+        avgxGAPerGame
+    };
+}
+
+// ======================
+// CORRECT POISSON MODEL
+// ======================
+
+function applyDixonColesCorrection(homeExp, awayExp) {
+    // Dixon-Coles τ parameter: typically -0.13 to -0.20 for soccer
+    const tau = -0.15;
+    
+    // Calculate base Poisson probabilities
+    const baseProbs = calculatePoissonProbabilities(homeExp, awayExp, 10);
+    
+    // Calculate adjustment factor for low-scoring games
+    // The correction reduces probability of 0-0, 1-1, etc.
+    const p00 = poissonPmf(0, homeExp) * poissonPmf(0, awayExp);
+    const p01 = poissonPmf(0, homeExp) * poissonPmf(1, awayExp);
+    const p10 = poissonPmf(1, homeExp) * poissonPmf(0, awayExp);
+    const p11 = poissonPmf(1, homeExp) * poissonPmf(1, awayExp);
+    
+    // Apply correction
+    const lambda = 1 - tau * homeExp * awayExp;
+    
+    // Adjust draw probability (0-0 and 1-1 are the main draws affected)
+    const drawAdjustment = (p00 + p11) * tau * homeExp * awayExp;
+    
+    const correctedDraw = Math.max(0.05, baseProbs.draw + drawAdjustment);
+    const drawChange = baseProbs.draw - correctedDraw;
+    
+    // Redistribute the change proportionally to home/away
+    const totalNonDraw = baseProbs.home + baseProbs.away;
+    const correctedHome = baseProbs.home + (drawChange * (baseProbs.home / totalNonDraw));
+    const correctedAway = baseProbs.away + (drawChange * (baseProbs.away / totalNonDraw));
+    
+    // Normalize to ensure sum = 1.0
+    const total = correctedHome + correctedDraw + correctedAway;
+    
+    return {
+        home: correctedHome / total,
+        draw: correctedDraw / total,
+        away: correctedAway / total
+    };
+}
+
+// Main model function with correct Poisson mathematics
 function calculateModelProbabilities(homeTeam, awayTeam) {
     const homeStats = teamData.find(t => t.Squad === homeTeam);
     const awayStats = teamData.find(t => t.Squad === awayTeam);
@@ -696,134 +826,74 @@ function calculateModelProbabilities(homeTeam, awayTeam) {
         return { home: 0.33, draw: 0.33, away: 0.33, homeExp: 1.5, awayExp: 1.5 };
     }
     
-    // 1. BASE EXPECTED GOALS - More aggressive matchup
-    const homeAttack = homeStats.xG || 1.5;
-    const homeDefense = homeStats.xGA || 1.5;
-    const awayAttack = awayStats.xG || 1.5;
-    const awayDefense = awayStats.xGA || 1.5;
+    // 1. CALCULATE LEAGUE AVERAGES DYNAMICALLY
+    const leagueStats = calculateLeagueAverages(teamData);
+    const avgGoalsPerTeam = leagueStats.avgGoalsPerTeam;
+    const avgxGPerGame = leagueStats.avgxGPerGame;
+    const avgxGAPerGame = leagueStats.avgxGAPerGame;
     
-    // More aggressive weighting - stronger teams should dominate more
-    // Home advantage factor (0.2 goals on average)
-    const homeAdvantage = 0.2;
-    const baseHomeExp = (homeAttack * 0.7) + (awayDefense * 0.3) + homeAdvantage;
-    const baseAwayExp = (awayAttack * 0.7) + (homeDefense * 0.3);
+    // 2. CONVERT SEASON TOTALS TO PER-GAME AVERAGES
+    const homeMP = Math.max(homeStats.MP || 1, 1);
+    const awayMP = Math.max(awayStats.MP || 1, 1);
     
-    // 2. STRENGTH DIFFERENTIAL CALCULATION
-    // Calculate team strength scores
-    const homeStrength = (
-        (homeStats['Pts/MP'] || 1.5) * 0.4 +
-        ((homeStats.xG || 1.5) / Math.max(homeStats.xGA || 1.5, 0.1)) * 0.3 +
-        ((homeStats.GF || 1) / Math.max(homeStats.GA || 1, 0.1)) * 0.3
-    );
+    const homexGPerGame = (homeStats.xG || 0) / homeMP;
+    const homexGAPerGame = (homeStats.xGA || 0) / homeMP;
+    const awayxGPerGame = (awayStats.xG || 0) / awayMP;
+    const awayxGAPerGame = (awayStats.xGA || 0) / awayMP;
     
-    const awayStrength = (
-        (awayStats['Pts/MP'] || 1.5) * 0.4 +
-        ((awayStats.xG || 1.5) / Math.max(awayStats.xGA || 1.5, 0.1)) * 0.3 +
-        ((awayStats.GF || 1) / Math.max(awayStats.GA || 1, 0.1)) * 0.3
-    );
+    // 3. CALCULATE ATTACK/DEFENSE STRENGTHS RELATIVE TO LEAGUE AVERAGE
+    // Attack strength: how much better/worse than average at scoring
+    const homeAttackStrength = homexGPerGame / Math.max(avgxGPerGame, 0.1);
+    const awayAttackStrength = awayxGPerGame / Math.max(avgxGPerGame, 0.1);
     
-    // Strength differential impact
-    const strengthDiff = homeStrength - awayStrength;
+    // FIX: Defense weakness (higher = worse defense, more goals conceded)
+    // This is the correct way to represent defensive ability
+    const homeDefenseWeakness = homexGAPerGame / Math.max(avgxGAPerGame, 0.1);
+    const awayDefenseWeakness = awayxGAPerGame / Math.max(avgxGAPerGame, 0.1);
     
-    // 3. WIN/DRAW RATES (but don't over-weight draws)
-    const homeWinRate = (homeStats.W || 0) / Math.max(homeStats.MP || 1, 1);
-    const homeDrawRate = (homeStats.D || 0) / Math.max(homeStats.MP || 1, 1);
-    const awayWinRate = (awayStats.W || 0) / Math.max(awayStats.MP || 1, 1);
-    const awayDrawRate = (awayStats.D || 0) / Math.max(awayStats.MP || 1, 1);
+    // 4. HOME ADVANTAGE FACTOR (empirically 1.20-1.30 depending on league)
+    const homeAdvantage = 1.25; // 25% boost for home team
     
-    // Reduce draw influence from historical data
-    const avgDrawRate = (homeDrawRate + awayDrawRate) / 2;
+    // 5. FIX: CALCULATE EXPECTED GOALS USING CORRECT FORMULA
+    // λ_home = (league avg) × (home attack) × (away defense weakness) × (home advantage)
+    // λ_away = (league avg) × (away attack) × (home defense weakness)
+    const homeExp = avgGoalsPerTeam * homeAttackStrength * awayDefenseWeakness * homeAdvantage;
+    const awayExp = avgGoalsPerTeam * awayAttackStrength * homeDefenseWeakness;
     
-    // 4. ADJUST EXPECTED GOALS BASED ON STRENGTH DIFFERENTIAL
-    // Stronger team gets a bigger boost
-    const strengthImpact = Math.abs(strengthDiff) * 0.5; // How much to adjust
+    console.log('=== CORRECTED Expected Goals Calculation ===');
+    console.log(`Home ${homeTeam}:`);
+    console.log(`  Formula: ${avgGoalsPerTeam.toFixed(2)} × ${homeAttackStrength.toFixed(2)} × ${awayDefenseWeakness.toFixed(2)} × ${homeAdvantage.toFixed(2)}`);
+    console.log(`  Result: ${homeExp.toFixed(2)} xG`);
+    console.log(`Away ${awayTeam}:`);
+    console.log(`  Formula: ${avgGoalsPerTeam.toFixed(2)} × ${awayAttackStrength.toFixed(2)} × ${homeDefenseWeakness.toFixed(2)}`);
+    console.log(`  Result: ${awayExp.toFixed(2)} xG`);
     
-    let homeExpFinal, awayExpFinal;
+    // 6. CALCULATE BASE POISSON PROBABILITIES
+    const baseProbs = calculatePoissonProbabilities(homeExp, awayExp, 10);
     
-    if (strengthDiff > 0) {
-        // Home is stronger
-        homeExpFinal = baseHomeExp * (1 + strengthImpact * 0.3);
-        awayExpFinal = baseAwayExp * (1 - strengthImpact * 0.2);
-    } else {
-        // Away is stronger
-        homeExpFinal = baseHomeExp * (1 - Math.abs(strengthImpact) * 0.2);
-        awayExpFinal = baseAwayExp * (1 + Math.abs(strengthImpact) * 0.3);
-    }
+    // 7. APPLY DIXON-COLES CORRECTION (only this adjustment)
+    const correctedProbs = applyDixonColesCorrection(homeExp, awayExp);
     
-    // Ensure minimum expected goals
-    homeExpFinal = Math.max(0.5, homeExpFinal);
-    awayExpFinal = Math.max(0.5, awayExpFinal);
-    
-    // 5. POISSON PROBABILITIES with higher max goals for better resolution
-    const poissonProbs = calculatePoissonProbabilities(homeExpFinal, awayExpFinal, 10);
-    
-    // 6. REDUCE DRAW BIAS IN POISSON
-    // Draws are overestimated in Poisson, especially for low-scoring matches
-    let adjustedHome = poissonProbs.home;
-    let adjustedDraw = poissonProbs.draw;
-    let adjustedAway = poissonProbs.away;
-    
-    // Reduce draw probability based on expected goals difference
-    const expectedDiff = homeExpFinal - awayExpFinal;
-    const diffFactor = Math.min(Math.abs(expectedDiff) * 0.5, 0.3); // Max 30% reduction
-    
-    if (Math.abs(expectedDiff) > 0.5) { // Only reduce draws if there's a clear favorite
-        adjustedDraw *= (1 - diffFactor);
-        
-        // Redistribute the reduced draw probability to the favorite
-        if (expectedDiff > 0) {
-            adjustedHome += (poissonProbs.draw * diffFactor * 0.7);
-            adjustedAway += (poissonProbs.draw * diffFactor * 0.3);
-        } else {
-            adjustedHome += (poissonProbs.draw * diffFactor * 0.3);
-            adjustedAway += (poissonProbs.draw * diffFactor * 0.7);
+    console.log('Probabilities:', {
+        base: {
+            home: (baseProbs.home * 100).toFixed(1) + '%',
+            draw: (baseProbs.draw * 100).toFixed(1) + '%',
+            away: (baseProbs.away * 100).toFixed(1) + '%'
+        },
+        afterDixonColes: {
+            home: (correctedProbs.home * 100).toFixed(1) + '%',
+            draw: (correctedProbs.draw * 100).toFixed(1) + '%',
+            away: (correctedProbs.away * 100).toFixed(1) + '%'
         }
-    }
-    
-    // 7. APPLY HISTORICAL PERFORMANCE WITH MINIMAL DRAW INFLUENCE
-    const historicalWeight = 0.15;
-    const modelWeight = 0.85;
-    
-    // Use win rates more than draw rates
-    let finalHome = (adjustedHome * modelWeight) + 
-                   (homeWinRate * historicalWeight * 0.8 + (1 - awayWinRate) * historicalWeight * 0.2);
-    
-    let finalAway = (adjustedAway * modelWeight) + 
-                   (awayWinRate * historicalWeight * 0.8 + (1 - homeWinRate) * historicalWeight * 0.2);
-    
-    let finalDraw = (adjustedDraw * modelWeight) + 
-                   (avgDrawRate * historicalWeight * 0.5); // Reduced draw influence
-    
-    // 8. STRENGTH-BASED FINAL ADJUSTMENT
-    // If one team is clearly stronger, reduce draw probability further
-    const clearFavoriteThreshold = 0.3; // 30% strength difference
-    
-    if (Math.abs(strengthDiff) > clearFavoriteThreshold) {
-        const favoriteBoost = Math.min((Math.abs(strengthDiff) - clearFavoriteThreshold) * 0.4, 0.2);
-        const drawReduction = finalDraw * favoriteBoost;
-        
-        if (strengthDiff > 0) {
-            // Home is clear favorite
-            finalHome += (drawReduction * 0.8);
-            finalAway += (drawReduction * 0.2);
-            finalDraw -= drawReduction;
-        } else {
-            // Away is clear favorite
-            finalHome += (drawReduction * 0.2);
-            finalAway += (drawReduction * 0.8);
-            finalDraw -= drawReduction;
-        }
-    }
-    
-    // Normalize to ensure sum = 1
-    const total = finalHome + finalDraw + finalAway;
+    });
     
     return {
-        home: finalHome / total,
-        draw: finalDraw / total,
-        away: finalAway / total,
-        homeExp: homeExpFinal,
-        awayExp: awayExpFinal
+        home: correctedProbs.home,
+        draw: correctedProbs.draw,
+        away: correctedProbs.away,
+        homeExp: homeExp,
+        awayExp: awayExp,
+        leagueAverages: leagueStats
     };
 }
 
@@ -883,6 +953,7 @@ function generatePrediction() {
     // Get expected goals for display
     const adjustedHomeExp = modelResult.homeExp;
     const adjustedAwayExp = modelResult.awayExp;
+    const leagueStats = modelResult.leagueAverages; // Get the league averages
     
     // Try to calculate betting probabilities
     let bettingProbs = calculateBettingProbabilities(homeOdds, drawOdds, awayOdds);
@@ -924,20 +995,24 @@ function generatePrediction() {
     const displayBetDraw = useBettingOdds ? bettingProbs.draw : null;
     const displayBetAway = useBettingOdds ? bettingProbs.away : null;
     
-    // Display results
-    displayPredictionResults(
+    // Display organized results
+    displayOrganizedPredictionResults(
         homeTeam, awayTeam, 
         modelProbs.home, modelProbs.draw, modelProbs.away,
         displayBetHome, displayBetDraw, displayBetAway,
         finalHome, finalDraw, finalAway,
         adjustedHomeExp, adjustedAwayExp,
         homeStats, awayStats,
-        useBettingOdds
+        useBettingOdds,
+        modelResult // Add this parameter for league averages
     );
 }
 
-// Display prediction results
-function displayPredictionResults(
+// ======================
+// ORGANIZED PREDICTION DISPLAY
+// ======================
+
+function displayOrganizedPredictionResults(
     homeTeam, awayTeam, 
     modelHome, modelDraw, modelAway,
     betHome, betDraw, betAway,
@@ -949,167 +1024,279 @@ function displayPredictionResults(
     const resultsDiv = document.getElementById('predictionContent');
     
     // Determine final prediction
-    let prediction, maxProb, predictionClass;
+    let prediction, maxProb, confidenceColor;
     if (finalHome >= finalAway && finalHome >= finalDraw) {
-        prediction = `${homeTeam} win`;
+        prediction = `${homeTeam} Win`;
         maxProb = finalHome;
-        predictionClass = 'home-fill';
+        confidenceColor = '#13ec5b';
     } else if (finalAway >= finalHome && finalAway >= finalDraw) {
-        prediction = `${awayTeam} win`;
+        prediction = `${awayTeam} Win`;
         maxProb = finalAway;
-        predictionClass = 'away-fill';
+        confidenceColor = '#b71c1c';
     } else {
         prediction = "Draw";
         maxProb = finalDraw;
-        predictionClass = 'draw-fill';
+        confidenceColor = '#757575';
     }
     
-    // Calculate expected score based on expected goals
-    const expectedHomeGoals = homeExp.toFixed(1);
-    const expectedAwayGoals = awayExp.toFixed(1);
+    // Calculate confidence level
+    let confidenceLevel = '';
+    if (maxProb >= 0.7) confidenceLevel = 'High Confidence';
+    else if (maxProb >= 0.5) confidenceLevel = 'Medium Confidence';
+    else confidenceLevel = 'Low Confidence';
     
-    // Build the probability table
-    let probabilityTable = `
-        <h4>Probability Breakdown</h4>
-        <table>
-            <thead>
-                <tr>
-                    <th>Source</th>
-                    <th>${homeTeam}</th>
-                    <th>Draw</th>
-                    <th>${awayTeam}</th>
-                </tr>
-            </thead>
-            <tbody>
-                <tr>
-                    <td><strong>Model</strong></td>
-                    <td>${(modelHome * 100).toFixed(1)}%</td>
-                    <td>${(modelDraw * 100).toFixed(1)}%</td>
-                    <td>${(modelAway * 100).toFixed(1)}%</td>
-                </tr>
+    // Format percentages
+    const formatPercent = (value) => (value * 100).toFixed(1) + '%';
+    
+    // Create organized HTML structure WITHOUT league statistics card
+    let html = `
+        <!-- Match Header -->
+        <div class="prediction-header">
+            <div>
+                <h3 class="prediction-title">${homeTeam} vs ${awayTeam}</h3>
+                <p style="color: #a0a0a0; margin-top: 0.25rem;">Expected Goals: ${homeExp.toFixed(1)} - ${awayExp.toFixed(1)}</p>
+            </div>
+            <div class="prediction-confidence" style="background-color: ${confidenceColor}22; border: 1px solid ${confidenceColor}44;">
+                ${formatPercent(maxProb)}
+            </div>
+        </div>
+        
+        <!-- Final Prediction -->
+        <div class="prediction-card">
+            <h4 style="font-size: 1.1rem; font-weight: 600; margin-bottom: 1rem; color: #ffffff;">
+                <i class="fas fa-bullseye" style="color: ${confidenceColor}; margin-right: 0.5rem;"></i>
+                Final Prediction: ${prediction}
+            </h4>
+            <div style="display: flex; align-items: center; margin-bottom: 1rem;">
+                <span style="width: 100px; font-weight: 600; color: #ffffff;">Confidence:</span>
+                <div style="flex: 1; background-color: rgba(255, 255, 255, 0.05); height: 20px; border-radius: 10px; overflow: hidden; margin: 0 1rem;">
+                    <div style="width: ${maxProb * 100}%; height: 100%; position: relative; background-color: ${confidenceColor};">
+                        <span style="position: absolute; right: 10px; top: 50%; transform: translateY(-50%); color: white; font-weight: 600; font-size: 0.85rem; text-shadow: 0 1px 2px rgba(0, 0, 0, 0.3);">${formatPercent(maxProb)}</span>
+                    </div>
+                </div>
+                <span style="font-weight: 600; color: ${confidenceColor};">${confidenceLevel}</span>
+            </div>
+            <p style="color: #a0a0a0; font-size: 0.9rem; margin-top: 0.5rem;">
+                Based on statistical analysis ${hasBettingOdds ? 'combined with market odds' : 'of team performance data'}.
+            </p>
+        </div>
+        
+        <!-- Probability Breakdown -->
+        <div class="prediction-card">
+            <h4 style="font-size: 1.1rem; font-weight: 600; margin-bottom: 1rem; color: #ffffff;">
+                <i class="fas fa-chart-pie" style="color: #13ec5b; margin-right: 0.5rem;"></i>
+                Probability Breakdown
+            </h4>
+            
+            <!-- Probability Table -->
+            <div class="probability-table-container">
+                <div class="probability-table-title">
+                    <i class="fas fa-table"></i>
+                    Probability Breakdown
+                </div>
+                <table class="probability-table">
+                    <thead>
+                        <tr>
+                            <th>Source</th>
+                            <th>${homeTeam}</th>
+                            <th>Draw</th>
+                            <th>${awayTeam}</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr class="model-row">
+                            <td class="team-header">Model</td>
+                            <td>${formatPercent(modelHome)}</td>
+                            <td>${formatPercent(modelDraw)}</td>
+                            <td>${formatPercent(modelAway)}</td>
+                        </tr>
     `;
     
+    // Add betting probabilities if available
     if (hasBettingOdds && betHome !== null && betDraw !== null && betAway !== null) {
-        probabilityTable += `
-                <tr>
-                    <td><strong>Betting</strong></td>
-                    <td>${(betHome * 100).toFixed(1)}%</td>
-                    <td>${(betDraw * 100).toFixed(1)}%</td>
-                    <td>${(betAway * 100).toFixed(1)}%</td>
-                </tr>
+        html += `
+                        <tr class="betting-row">
+                            <td class="team-header">Betting</td>
+                            <td>${formatPercent(betHome)}</td>
+                            <td>${formatPercent(betDraw)}</td>
+                            <td>${formatPercent(betAway)}</td>
+                        </tr>
         `;
     }
     
-    probabilityTable += `
-                <tr style="background-color: #f8f9fa;">
-                    <td><strong>Final</strong></td>
-                    <td><strong>${(finalHome * 100).toFixed(1)}%</strong></td>
-                    <td><strong>${(finalDraw * 100).toFixed(1)}%</strong></td>
-                    <td><strong>${(finalAway * 100).toFixed(1)}%</strong></td>
-                </tr>
-            </tbody>
-        </table>
+    html += `
+                        <tr class="final-row">
+                            <td class="team-header">Final</td>
+                            <td>${formatPercent(finalHome)}</td>
+                            <td>${formatPercent(finalDraw)}</td>
+                            <td>${formatPercent(finalAway)}</td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+            
+            <!-- Final Prediction Ranking -->
+            <div class="final-prediction">
+                <div class="final-prediction-title">
+                    <i class="fas fa-trophy"></i>
+                    Final Prediction
+                </div>
+                <div class="prediction-list">
     `;
     
-    let html = `
-        <h3>${homeTeam} vs ${awayTeam}</h3>
-        <div class="info-box">
-            <i class="fas fa-info-circle"></i> 
-            <strong>Expected goals:</strong> ${homeTeam} ${expectedHomeGoals} - ${awayTeam} ${expectedAwayGoals}
-        </div>
-        
-        <h4>Team Statistics</h4>
-        <table>
-            <thead>
-                <tr>
-                    <th>Team</th>
-                    <th>MP</th>
-                    <th>W</th>
-                    <th>D</th>
-                    <th>L</th>
-                    <th>GF</th>
-                    <th>GA</th>
-                    <th>xG</th>
-                    <th>xGA</th>
-                </tr>
-            </thead>
-            <tbody>
-                <tr>
-                    <td><strong>${homeTeam}</strong></td>
-                    <td>${homeStats.MP || '-'}</td>
-                    <td>${homeStats.W || '-'}</td>
-                    <td>${homeStats.D || '-'}</td>
-                    <td>${homeStats.L || '-'}</td>
-                    <td>${homeStats.GF || '-'}</td>
-                    <td>${homeStats.GA || '-'}</td>
-                    <td>${homeStats.xG ? homeStats.xG.toFixed(1) : '-'}</td>
-                    <td>${homeStats.xGA ? homeStats.xGA.toFixed(1) : '-'}</td>
-                </tr>
-                <tr>
-                    <td><strong>${awayTeam}</strong></td>
-                    <td>${awayStats.MP || '-'}</td>
-                    <td>${awayStats.W || '-'}</td>
-                    <td>${awayStats.D || '-'}</td>
-                    <td>${awayStats.L || '-'}</td>
-                    <td>${awayStats.GF || '-'}</td>
-                    <td>${awayStats.GA || '-'}</td>
-                    <td>${awayStats.xG ? awayStats.xG.toFixed(1) : '-'}</td>
-                    <td>${awayStats.xGA ? awayStats.xGA.toFixed(1) : '-'}</td>
-                </tr>
-            </tbody>
-        </table>
-        
-        ${probabilityTable}
-        
-        <h4>Final Prediction</h4>
-        <div class="probability-bar">
-            <div class="probability-fill ${predictionClass}" style="width: ${maxProb * 100}%"></div>
-            <div class="probability-label">${prediction} (${(maxProb * 100).toFixed(1)}%)</div>
-        </div>
-        
-        <div style="display: flex; justify-content: space-between; margin-top: 20px;">
-            <div class="probability-bar" style="width: 32%; height: 15px;">
-                <div class="probability-fill home-fill" style="width: ${finalHome * 100}%"></div>
-            </div>
-            <div class="probability-bar" style="width: 32%; height: 15px;">
-                <div class="probability-fill draw-fill" style="width: ${finalDraw * 100}%"></div>
-            </div>
-            <div class="probability-bar" style="width: 32%; height: 15px;">
-                <div class="probability-fill away-fill" style="width: ${finalAway * 100}%"></div>
-            </div>
-        </div>
-        
-        <div style="display: flex; justify-content: space-between; margin-top: 5px; font-size: 0.9rem; color: #666;">
-            <div>${homeTeam}</div>
-            <div>Draw</div>
-            <div>${awayTeam}</div>
-        </div>
-    `;
+    // Determine ranking order
+    const predictions = [
+        { team: homeTeam, percent: finalHome, type: 'home' },
+        { team: 'Draw', percent: finalDraw, type: 'draw' },
+        { team: awayTeam, percent: finalAway, type: 'away' }
+    ];
     
-    // Add betting advice only if betting odds were used
-    if (hasBettingOdds) {
+    // Sort by percentage (highest first)
+    predictions.sort((a, b) => b.percent - a.percent);
+    
+    // Add prediction items
+    predictions.forEach((pred, index) => {
         html += `
-        <div class="info-box" style="margin-top: 1.5rem;">
-            <h4><i class="fas fa-lightbulb"></i> How to Use This Prediction</h4>
-            <p>1. Compare the final probabilities with actual betting odds</p>
-            <p>2. Look for discrepancies where model predictions differ from market odds</p>
-            <p>3. Use the <a href="odds-analyzer.html" style="color: #2e7d32; font-weight: 600;">Odds Analyzer</a> to find the best available odds for your bet</p>
+                    <div class="prediction-item ${pred.type}">
+                        <div class="prediction-rank">${index + 1}</div>
+                        <div class="prediction-team">${pred.team}</div>
+                        <div class="prediction-percent">${formatPercent(pred.percent)}</div>
+                    </div>
+        `;
+    });
+    
+    html += `
+                </div>
+            </div>
         </div>
+        
+        <!-- Team Statistics -->
+        <div class="prediction-card">
+            <h4 style="font-size: 1.1rem; font-weight: 600; margin-bottom: 1rem; color: #ffffff;">
+                <i class="fas fa-chart-bar" style="color: #13ec5b; margin-right: 0.5rem;"></i>
+                Team Statistics Comparison
+            </h4>
+            
+            <table class="comparison-table">
+                <thead>
+                    <tr>
+                        <th>Statistic</th>
+                        <th>${homeTeam}</th>
+                        <th>${awayTeam}</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr>
+                        <td>Matches Played</td>
+                        <td>${homeStats.MP || '-'}</td>
+                        <td>${awayStats.MP || '-'}</td>
+                    </tr>
+                    <tr>
+                        <td>Wins</td>
+                        <td>${homeStats.W || '-'}</td>
+                        <td>${awayStats.W || '-'}</td>
+                    </tr>
+                    <tr>
+                        <td>Draws</td>
+                        <td>${homeStats.D || '-'}</td>
+                        <td>${awayStats.D || '-'}</td>
+                    </tr>
+                    <tr>
+                        <td>Losses</td>
+                        <td>${homeStats.L || '-'}</td>
+                        <td>${awayStats.L || '-'}</td>
+                    </tr>
+                    <tr>
+                        <td>Goals For</td>
+                        <td>${homeStats.GF || '-'}</td>
+                        <td>${awayStats.GF || '-'}</td>
+                    </tr>
+                    <tr>
+                        <td>Goals Against</td>
+                        <td>${homeStats.GA || '-'}</td>
+                        <td>${awayStats.GA || '-'}</td>
+                    </tr>
+                    <tr>
+                        <td>Expected Goals (xG)</td>
+                        <td>${homeStats.xG ? homeStats.xG.toFixed(1) : '-'}</td>
+                        <td>${awayStats.xG ? awayStats.xG.toFixed(1) : '-'}</td>
+                    </tr>
+                    <tr>
+                        <td>Expected Goals Against (xGA)</td>
+                        <td>${homeStats.xGA ? homeStats.xGA.toFixed(1) : '-'}</td>
+                        <td>${awayStats.xGA ? awayStats.xGA.toFixed(1) : '-'}</td>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
+        
+        <!-- Insights Section -->
+        <div class="prediction-card">
+            <h4 style="font-size: 1.1rem; font-weight: 600; margin-bottom: 1rem; color: #ffffff;">
+                <i class="fas fa-lightbulb" style="color: #f59e0b; margin-right: 0.5rem;"></i>
+                ${hasBettingOdds ? 'Betting Insights' : 'Statistical Analysis'}
+            </h4>
+            
+            <div style="color: #a0a0a0; line-height: 1.6;">
+    `;
+    
+    if (hasBettingOdds) {
+        // Calculate value bet
+        let valueBet = null;
+        const homeOdds = document.getElementById('homeOdds').value || '';
+        const drawOdds = document.getElementById('drawOdds').value || '';
+        const awayOdds = document.getElementById('awayOdds').value || '';
+        
+        const homeImplied = homeOdds ? 1 / americanToDecimal(homeOdds) : 0;
+        const drawImplied = drawOdds ? 1 / americanToDecimal(drawOdds) : 0;
+        const awayImplied = awayOdds ? 1 / americanToDecimal(awayOdds) : 0;
+        
+        if (finalHome > homeImplied && homeImplied > 0) {
+            valueBet = `${homeTeam} Win (Value: ${((finalHome/homeImplied - 1)*100).toFixed(1)}%)`;
+        } else if (finalDraw > drawImplied && drawImplied > 0) {
+            valueBet = `Draw (Value: ${((finalDraw/drawImplied - 1)*100).toFixed(1)}%)`;
+        } else if (finalAway > awayImplied && awayImplied > 0) {
+            valueBet = `${awayTeam} Win (Value: ${((finalAway/awayImplied - 1)*100).toFixed(1)}%)`;
+        }
+        
+        if (valueBet) {
+            html += `
+                <p><span style="color: #13ec5b; font-weight: 600;">✓ Value Bet Detected:</span> 
+                Model suggests ${valueBet} offers positive expected value.</p>
+            `;
+        } else {
+            html += `
+                <p>Market odds appear efficient. No significant value bet detected.</p>
+            `;
+        }
+        
+        html += `
+            <p style="margin-top: 1rem;">Model weight: ${(parseFloat(document.getElementById('modelWeight').value) * 100).toFixed(0)}% model, ${(100 - parseFloat(document.getElementById('modelWeight').value) * 100).toFixed(0)}% market odds</p>
+            <p>Use the <a href="odds-analyzer.html" style="color: #13ec5b; font-weight: 600; text-decoration: none;">Odds Analyzer</a> to find the best available odds.</p>
         `;
     } else {
         html += `
-        <div class="info-box" style="margin-top: 1.5rem;">
-            <h4><i class="fas fa-lightbulb"></i> Pure Statistical Prediction</h4>
-            <p>This prediction is based purely on statistical team data (xG, goals, points, etc.).</p>
-            <p>For betting insights, add American format odds (e.g., +150, +220, +140) to combine model with market data.</p>
-        </div>
+            <p>This prediction is based purely on statistical analysis of team performance data using:</p>
+            <ul style="margin-left: 1.5rem; margin-top: 0.5rem;">
+                <li>Poisson distribution for goal probabilities</li>
+                <li>Expected Goals (xG) data analysis</li>
+                <li>Team strength differential calculations</li>
+                <li>Historical performance weighting</li>
+            </ul>
+            <p style="margin-top: 1rem;"><span style="color: #f59e0b; font-weight: 600;">Tip:</span> 
+            Add betting odds to combine statistical model with market data for hybrid predictions.</p>
         `;
     }
+    
+    html += `
+            </div>
+        </div>
+    `;
     
     resultsDiv.innerHTML = html;
     document.getElementById('predictionResults').style.display = 'block';
     
-    // Scroll to results
+    // Scroll to results smoothly
     resultsDiv.scrollIntoView({ behavior: 'smooth', block: 'start' });
 }
 
@@ -1137,14 +1324,12 @@ function resetDataState() {
     // Reset UI
     document.getElementById('fileList').innerHTML = '';
     document.getElementById('dataStatus').style.display = 'none';
-    document.getElementById('processDataBtn').disabled = true;
-    document.getElementById('processDataBtn').innerHTML = '<i class="fas fa-cogs"></i> Process Data';
     document.getElementById('predictBtn').disabled = true;
     document.getElementById('homeTeam').disabled = true;
     document.getElementById('awayTeam').disabled = true;
     document.getElementById('teamStats').style.display = 'none';
     document.getElementById('predictionResults').style.display = 'none';
-    document.getElementById('csvUploadCard').style.display = 'block';
+    document.getElementById('csvUploadCard').style.display = 'none';
     
     // Reset league selection
     const leagueOptions = document.querySelectorAll('.league-option');
@@ -1159,17 +1344,18 @@ function resetDataState() {
         customOption.classList.add('active');
         customOption.querySelector('.league-check').style.display = 'inline-block';
         selectedLeague = 'custom';
+        document.getElementById('csvUploadCard').style.display = 'block';
     }
     
     updateLeagueInfo();
     
     // Reset dropdowns
-    document.getElementById('homeTeam').innerHTML = '<option value="">-- Upload CSV data first --</option>';
-    document.getElementById('awayTeam').innerHTML = '<option value="">-- Upload CSV data first --</option>';
+    document.getElementById('homeTeam').innerHTML = '<option value="">-- Upload or select data first --</option>';
+    document.getElementById('awayTeam').innerHTML = '<option value="">-- Upload or select data first --</option>';
     
     // Reset team displays
     document.getElementById('homeTeamDisplay').innerHTML = `
-        <h3>Upload Data First</h3>
+        <h3>Select Home Team</h3>
         <div class="team-stats">
             <div class="stat-item">
                 <div class="stat-value">-</div>
@@ -1183,7 +1369,7 @@ function resetDataState() {
     `;
     
     document.getElementById('awayTeamDisplay').innerHTML = `
-        <h3>Upload Data First</h3>
+        <h3>Select Away Team</h3>
         <div class="team-stats">
             <div class="stat-item">
                 <div class="stat-value">-</div>
@@ -1254,8 +1440,7 @@ function loadFromLocalStorage() {
                 showNotification(`Loaded ${teamData.length} teams from previous session`, 'info');
             }
             
-            updateLeagueInfo();
-            checkFileReady();
+            updateLeagueInfo(selectedLeague);
         }
     } catch (e) {
         console.warn('Could not load data from localStorage:', e);
@@ -1270,3 +1455,4 @@ function clearLocalStorage() {
         console.warn('Could not clear localStorage:', e);
     }
 }
+

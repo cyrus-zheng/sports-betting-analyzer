@@ -1,4 +1,3 @@
-<!-- odds-analyzer.html -->
 <!DOCTYPE html>
 <html class="dark" lang="en">
 <head>
@@ -97,7 +96,7 @@
                     <div class="space-y-4">
                         <div>
                             <label class="block text-slate-700 dark:text-slate-300 font-medium mb-2">Event Name</label>
-                            <input type="text" id="eventName" placeholder="e.g., Lakers vs Celtics" value="Manchester United vs Arsenal"
+                            <input type="text" id="eventName" placeholder="e.g., Manchester United vs Arsenal"
                                 class="w-full px-4 py-3 bg-background-light dark:bg-background-dark border border-gray-300 dark:border-border-dark rounded-lg focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent text-slate-900 dark:text-white">
                         </div>
                         
@@ -121,28 +120,13 @@
                                 <!-- Outcome rows will be generated here -->
                                 <div class="outcome-row">
                                     <div class="outcome-name flex-1">
-                                        <input type="text" class="outcome-input w-full px-4 py-3 bg-background-light dark:bg-background-dark border border-gray-300 dark:border-border-dark rounded-lg" placeholder="Outcome name" value="Manchester United">
+                                        <input type="text" class="outcome-input w-full px-4 py-3 bg-background-light dark:bg-background-dark border border-gray-300 dark:border-border-dark rounded-lg" placeholder="Outcome Name">
                                     </div>
                                     <div class="bookmaker-odds flex gap-2">
-                                        <input type="text" class="odds-input w-20 px-3 py-2 bg-background-light dark:bg-background-dark border border-gray-300 dark:border-border-dark rounded text-center" placeholder="N/A" data-bookmaker="0">
-                                        <input type="text" class="odds-input w-20 px-3 py-2 bg-background-light dark:bg-background-dark border border-gray-300 dark:border-border-dark rounded text-center" placeholder="N/A" data-bookmaker="1">
-                                        <input type="text" class="odds-input w-20 px-3 py-2 bg-background-light dark:bg-background-dark border border-gray-300 dark:border-border-dark rounded text-center" placeholder="N/A" data-bookmaker="2">
-                                        <input type="text" class="odds-input w-20 px-3 py-2 bg-background-light dark:bg-background-dark border border-gray-300 dark:border-border-dark rounded text-center" placeholder="N/A" data-bookmaker="3">
-                                    </div>
-                                    <button class="remove-outcome px-4 py-2 bg-red-500/20 text-red-500 rounded-lg hover:bg-red-500/30 transition-colors">
-                                        <span class="material-symbols-outlined">delete</span>
-                                    </button>
-                                </div>
-                                
-                                <div class="outcome-row">
-                                    <div class="outcome-name flex-1">
-                                        <input type="text" class="outcome-input w-full px-4 py-3 bg-background-light dark:bg-background-dark border border-gray-300 dark:border-border-dark rounded-lg" placeholder="Outcome name" value="Arsenal">
-                                    </div>
-                                    <div class="bookmaker-odds flex gap-2">
-                                        <input type="text" class="odds-input w-20 px-3 py-2 bg-background-light dark:bg-background-dark border border-gray-300 dark:border-border-dark rounded text-center" placeholder="N/A" data-bookmaker="0">
-                                        <input type="text" class="odds-input w-20 px-3 py-2 bg-background-light dark:bg-background-dark border border-gray-300 dark:border-border-dark rounded text-center" placeholder="N/A" data-bookmaker="1">
-                                        <input type="text" class="odds-input w-20 px-3 py-2 bg-background-light dark:bg-background-dark border border-gray-300 dark:border-border-dark rounded text-center" placeholder="N/A" data-bookmaker="2">
-                                        <input type="text" class="odds-input w-20 px-3 py-2 bg-background-light dark:bg-background-dark border border-gray-300 dark:border-border-dark rounded text-center" placeholder="N/A" data-bookmaker="3">
+                                        <input type="text" class="odds-input w-20 px-4 py-3 bg-background-light dark:bg-background-dark border border-gray-300 dark:border-border-dark rounded text-center text-xs" placeholder="FanDuel" data-bookmaker="0">
+                                        <input type="text" class="odds-input w-20 px-4 py-3 bg-background-light dark:bg-background-dark border border-gray-300 dark:border-border-dark rounded text-center text-xs" placeholder="Bet365" data-bookmaker="1">
+                                        <input type="text" class="odds-input w-20 px-4 py-3 bg-background-light dark:bg-background-dark border border-gray-300 dark:border-border-dark rounded text-center text-xs" placeholder="BetOnline" data-bookmaker="2">
+                                        <input type="text" class="odds-input w-20 px-4 py-3 bg-background-light dark:bg-background-dark border border-gray-300 dark:border-border-dark rounded text-center text-xs" placeholder="Pinnacle" data-bookmaker="3">
                                     </div>
                                     <button class="remove-outcome px-4 py-2 bg-red-500/20 text-red-500 rounded-lg hover:bg-red-500/30 transition-colors">
                                         <span class="material-symbols-outlined">delete</span>
@@ -154,10 +138,25 @@
                                         <input type="text" class="outcome-input w-full px-4 py-3 bg-background-light dark:bg-background-dark border border-gray-300 dark:border-border-dark rounded-lg" placeholder="Outcome name" value="Draw">
                                     </div>
                                     <div class="bookmaker-odds flex gap-2">
-                                        <input type="text" class="odds-input w-20 px-3 py-2 bg-background-light dark:bg-background-dark border border-gray-300 dark:border-border-dark rounded text-center" placeholder="N/A" data-bookmaker="0">
-                                        <input type="text" class="odds-input w-20 px-3 py-2 bg-background-light dark:bg-background-dark border border-gray-300 dark:border-border-dark rounded text-center" placeholder="N/A" data-bookmaker="1">
-                                        <input type="text" class="odds-input w-20 px-3 py-2 bg-background-light dark:bg-background-dark border border-gray-300 dark:border-border-dark rounded text-center" placeholder="N/A" data-bookmaker="2">
-                                        <input type="text" class="odds-input w-20 px-3 py-2 bg-background-light dark:bg-background-dark border border-gray-300 dark:border-border-dark rounded text-center" placeholder="N/A" data-bookmaker="3">
+                                        <input type="text" class="odds-input w-20 px-4 py-3 bg-background-light dark:bg-background-dark border border-gray-300 dark:border-border-dark rounded text-center text-xs" placeholder="FanDuel" data-bookmaker="0">
+                                        <input type="text" class="odds-input w-20 px-4 py-3 bg-background-light dark:bg-background-dark border border-gray-300 dark:border-border-dark rounded text-center text-xs" placeholder="Bet365" data-bookmaker="1">
+                                        <input type="text" class="odds-input w-20 px-4 py-3 bg-background-light dark:bg-background-dark border border-gray-300 dark:border-border-dark rounded text-center text-xs" placeholder="BetOnline" data-bookmaker="2">
+                                        <input type="text" class="odds-input w-20 px-4 py-3 bg-background-light dark:bg-background-dark border border-gray-300 dark:border-border-dark rounded text-center text-xs" placeholder="Pinnacle" data-bookmaker="3">
+                                    </div>
+                                    <button class="remove-outcome px-4 py-2 bg-red-500/20 text-red-500 rounded-lg hover:bg-red-500/30 transition-colors">
+                                        <span class="material-symbols-outlined">delete</span>
+                                    </button>
+                                </div>
+                                
+                                <div class="outcome-row">
+                                    <div class="outcome-name flex-1">
+                                        <input type="text" class="outcome-input w-full px-4 py-3 bg-background-light dark:bg-background-dark border border-gray-300 dark:border-border-dark rounded-lg" placeholder="Outcome Name">
+                                    </div>
+                                    <div class="bookmaker-odds flex gap-2">
+                                        <input type="text" class="odds-input w-20 px-4 py-3 bg-background-light dark:bg-background-dark border border-gray-300 dark:border-border-dark rounded text-center text-xs" placeholder="FanDuel" data-bookmaker="0">
+                                        <input type="text" class="odds-input w-20 px-4 py-3 bg-background-light dark:bg-background-dark border border-gray-300 dark:border-border-dark rounded text-center text-xs" placeholder="Bet365" data-bookmaker="1">
+                                        <input type="text" class="odds-input w-20 px-4 py-3 bg-background-light dark:bg-background-dark border border-gray-300 dark:border-border-dark rounded text-center text-xs" placeholder="BetOnline" data-bookmaker="2">
+                                        <input type="text" class="odds-input w-20 px-4 py-3 bg-background-light dark:bg-background-dark border border-gray-300 dark:border-border-dark rounded text-center text-xs" placeholder="Pinnacle" data-bookmaker="3">
                                     </div>
                                     <button class="remove-outcome px-4 py-2 bg-red-500/20 text-red-500 rounded-lg hover:bg-red-500/30 transition-colors">
                                         <span class="material-symbols-outlined">delete</span>
@@ -246,7 +245,12 @@
             </div>
         </div>
     </div>
-    
-    <script src="js/odds-analyzer.js"></script>
+
+    <script src="js/odds-analyzer/odds-utils.js"></script>
+    <script src="js/odds-analyzer/odds-calculations.js"></script>
+    <script src="js/odds-analyzer/odds-ui.js"></script>
+    <script src="js/odds-analyzer/odds-display.js"></script>
+    <script src="js/odds-analyzer/odds-analysis.js"></script>
+    <script src="js/odds-analyzer/odds-analyzer.js"></script>
 </body>
 </html>

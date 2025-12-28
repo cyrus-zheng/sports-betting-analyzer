@@ -1,4 +1,3 @@
-<!-- odds-analyzer.html -->
 <!DOCTYPE html>
 <html class="dark" lang="en">
 <head>
@@ -93,6 +92,31 @@
                         <span class="material-symbols-outlined text-primary">calculate</span>
                         Create Betting Market
                     </h2>
+
+                    <!-- CSV Upload Section -->
+                    <div>
+                        <label class="block text-slate-700 dark:text-slate-300 font-medium mb-2">
+                            Upload CSV File
+                            <span class="ml-2 px-2 py-1 bg-primary/10 text-primary text-xs rounded">Optional</span>
+                        </label>
+                        <div class="flex gap-2">
+                            <input type="file" id="csvFileInput" accept=".csv" 
+                                class="w-full px-4 py-3 bg-background-light dark:bg-background-dark border border-gray-300 dark:border-border-dark rounded-lg focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent text-slate-900 dark:text-white file:mr-4 file:py-2 file:px-4 file:rounded-lg file:border-0 file:text-sm file:font-semibold file:bg-primary file:text-background-dark hover:file:bg-primary/90">
+                            <button id="clearCsvBtn" class="px-6 py-3 bg-red-500/20 text-red-500 rounded-lg hover:bg-red-500/30 transition-colors whitespace-nowrap" style="display: none;">
+                                <span class="material-symbols-outlined">close</span>
+                            </button>
+                        </div>
+                        <p class="text-xs text-slate-500 dark:text-slate-400 mt-1">Upload a CSV with columns: Bookmaker, home_team, away_team, label, price</p>
+                    </div>
+
+                    <!-- Match Selection Dropdown (Hidden until CSV is loaded) -->
+                    <div id="matchSelectionContainer" style="display: none;">
+                        <label class="block text-slate-700 dark:text-slate-300 font-medium mb-2">Select Match</label>
+                        <select id="matchSelector"
+                            class="w-full px-4 py-3 bg-background-light dark:bg-background-dark border border-gray-300 dark:border-border-dark rounded-lg focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent text-slate-900 dark:text-white">
+                            <option value="">-- Select a match --</option>
+                        </select>
+                    </div>
                     
                     <div class="space-y-4">
                         <div>
@@ -246,7 +270,12 @@
             </div>
         </div>
     </div>
-    
-    <script src="js/odds-analyzer.js"></script>
+
+    <script src="js/odds-analyzer/odds-utils.js"></script>
+    <script src="js/odds-analyzer/odds-calculations.js"></script>
+    <script src="js/odds-analyzer/odds-ui.js"></script>
+    <script src="js/odds-analyzer/odds-display.js"></script>
+    <script src="js/odds-analyzer/odds-analysis.js"></script>
+    <script src="js/odds-analyzer/odds-analyzer.js"></script>
 </body>
 </html>

@@ -728,7 +728,96 @@ function calculateBettingProbabilities(homeOdds, drawOdds, awayOdds) {
     };
 }
 
-// Improved model with better home/away balance
+// ======================
+// LEAGUE STATS CALCULATION
+// ======================
+
+function calculateLeagueAverages(teamData) {
+    if (!teamData || teamData.length === 0) {
+        return {
+            avgGoalsPerGame: 2.7,
+            avgGoalsPerTeam: 1.35,
+            avgxGPerGame: 1.5,
+            avgxGAPerGame: 1.5
+        };
+    }
+    
+    // FIX: Calculate total matches correctly (each match involves 2 teams)
+    const totalMatchesPlayed = teamData.reduce((sum, team) => sum + (team.MP || 0), 0);
+    const totalMatches = totalMatchesPlayed / 2; // Divide by 2 since each match is counted twice
+    
+    // Calculate total goals scored across all teams
+    const totalGoalsScored = teamData.reduce((sum, team) => sum + (team.GF || 0), 0);
+    
+    // Calculate totals for xG and xGA
+    const totalxG = teamData.reduce((sum, team) => sum + (team.xG || 0), 0);
+    const totalxGA = teamData.reduce((sum, team) => sum + (team.xGA || 0), 0);
+    
+    // CORRECTED AVERAGES PER GAME
+    const avgGoalsPerGame = totalMatches > 0 ? totalGoalsScored / totalMatches : 2.7;
+    const avgGoalsPerTeam = avgGoalsPerGame / 2; // Each team scores half the goals in a match on average
+    const avgxGPerGame = totalMatches > 0 ? totalxG / totalMatches : 1.5;
+    const avgxGAPerGame = totalMatches > 0 ? totalxGA / totalMatches : 1.5;
+    
+    console.log('CORRECTED League Averages (PER GAME):', {
+        totalMatches: totalMatches.toFixed(0),
+        avgGoalsPerGame: avgGoalsPerGame.toFixed(2),
+        avgGoalsPerTeam: avgGoalsPerTeam.toFixed(2),
+        avgxGPerGame: avgxGPerGame.toFixed(2),
+        avgxGAPerGame: avgxGAPerGame.toFixed(2)
+    });
+    
+    return {
+        avgGoalsPerGame,
+        avgGoalsPerTeam,
+        avgxGPerGame,
+        avgxGAPerGame
+    };
+}
+
+// ======================
+// CORRECT POISSON MODEL
+// ======================
+
+function applyDixonColesCorrection(homeExp, awayExp) {
+    // Dixon-Coles τ parameter: typically -0.13 to -0.20 for soccer
+    const tau = -0.15;
+    
+    // Calculate base Poisson probabilities
+    const baseProbs = calculatePoissonProbabilities(homeExp, awayExp, 10);
+    
+    // Calculate adjustment factor for low-scoring games
+    // The correction reduces probability of 0-0, 1-1, etc.
+    const p00 = poissonPmf(0, homeExp) * poissonPmf(0, awayExp);
+    const p01 = poissonPmf(0, homeExp) * poissonPmf(1, awayExp);
+    const p10 = poissonPmf(1, homeExp) * poissonPmf(0, awayExp);
+    const p11 = poissonPmf(1, homeExp) * poissonPmf(1, awayExp);
+    
+    // Apply correction
+    const lambda = 1 - tau * homeExp * awayExp;
+    
+    // Adjust draw probability (0-0 and 1-1 are the main draws affected)
+    const drawAdjustment = (p00 + p11) * tau * homeExp * awayExp;
+    
+    const correctedDraw = Math.max(0.05, baseProbs.draw + drawAdjustment);
+    const drawChange = baseProbs.draw - correctedDraw;
+    
+    // Redistribute the change proportionally to home/away
+    const totalNonDraw = baseProbs.home + baseProbs.away;
+    const correctedHome = baseProbs.home + (drawChange * (baseProbs.home / totalNonDraw));
+    const correctedAway = baseProbs.away + (drawChange * (baseProbs.away / totalNonDraw));
+    
+    // Normalize to ensure sum = 1.0
+    const total = correctedHome + correctedDraw + correctedAway;
+    
+    return {
+        home: correctedHome / total,
+        draw: correctedDraw / total,
+        away: correctedAway / total
+    };
+}
+
+// Main model function with correct Poisson mathematics
 function calculateModelProbabilities(homeTeam, awayTeam) {
     const homeStats = teamData.find(t => t.Squad === homeTeam);
     const awayStats = teamData.find(t => t.Squad === awayTeam);
@@ -737,134 +826,74 @@ function calculateModelProbabilities(homeTeam, awayTeam) {
         return { home: 0.33, draw: 0.33, away: 0.33, homeExp: 1.5, awayExp: 1.5 };
     }
     
-    // 1. BASE EXPECTED GOALS - More aggressive matchup
-    const homeAttack = homeStats.xG || 1.5;
-    const homeDefense = homeStats.xGA || 1.5;
-    const awayAttack = awayStats.xG || 1.5;
-    const awayDefense = awayStats.xGA || 1.5;
+    // 1. CALCULATE LEAGUE AVERAGES DYNAMICALLY
+    const leagueStats = calculateLeagueAverages(teamData);
+    const avgGoalsPerTeam = leagueStats.avgGoalsPerTeam;
+    const avgxGPerGame = leagueStats.avgxGPerGame;
+    const avgxGAPerGame = leagueStats.avgxGAPerGame;
     
-    // More aggressive weighting - stronger teams should dominate more
-    // Home advantage factor (0.2 goals on average)
-    const homeAdvantage = 0.2;
-    const baseHomeExp = (homeAttack * 0.7) + (awayDefense * 0.3) + homeAdvantage;
-    const baseAwayExp = (awayAttack * 0.7) + (homeDefense * 0.3);
+    // 2. CONVERT SEASON TOTALS TO PER-GAME AVERAGES
+    const homeMP = Math.max(homeStats.MP || 1, 1);
+    const awayMP = Math.max(awayStats.MP || 1, 1);
     
-    // 2. STRENGTH DIFFERENTIAL CALCULATION
-    // Calculate team strength scores
-    const homeStrength = (
-        (homeStats['Pts/MP'] || 1.5) * 0.4 +
-        ((homeStats.xG || 1.5) / Math.max(homeStats.xGA || 1.5, 0.1)) * 0.3 +
-        ((homeStats.GF || 1) / Math.max(homeStats.GA || 1, 0.1)) * 0.3
-    );
+    const homexGPerGame = (homeStats.xG || 0) / homeMP;
+    const homexGAPerGame = (homeStats.xGA || 0) / homeMP;
+    const awayxGPerGame = (awayStats.xG || 0) / awayMP;
+    const awayxGAPerGame = (awayStats.xGA || 0) / awayMP;
     
-    const awayStrength = (
-        (awayStats['Pts/MP'] || 1.5) * 0.4 +
-        ((awayStats.xG || 1.5) / Math.max(awayStats.xGA || 1.5, 0.1)) * 0.3 +
-        ((awayStats.GF || 1) / Math.max(awayStats.GA || 1, 0.1)) * 0.3
-    );
+    // 3. CALCULATE ATTACK/DEFENSE STRENGTHS RELATIVE TO LEAGUE AVERAGE
+    // Attack strength: how much better/worse than average at scoring
+    const homeAttackStrength = homexGPerGame / Math.max(avgxGPerGame, 0.1);
+    const awayAttackStrength = awayxGPerGame / Math.max(avgxGPerGame, 0.1);
     
-    // Strength differential impact
-    const strengthDiff = homeStrength - awayStrength;
+    // FIX: Defense weakness (higher = worse defense, more goals conceded)
+    // This is the correct way to represent defensive ability
+    const homeDefenseWeakness = homexGAPerGame / Math.max(avgxGAPerGame, 0.1);
+    const awayDefenseWeakness = awayxGAPerGame / Math.max(avgxGAPerGame, 0.1);
     
-    // 3. WIN/DRAW RATES (but don't over-weight draws)
-    const homeWinRate = (homeStats.W || 0) / Math.max(homeStats.MP || 1, 1);
-    const homeDrawRate = (homeStats.D || 0) / Math.max(homeStats.MP || 1, 1);
-    const awayWinRate = (awayStats.W || 0) / Math.max(awayStats.MP || 1, 1);
-    const awayDrawRate = (awayStats.D || 0) / Math.max(awayStats.MP || 1, 1);
+    // 4. HOME ADVANTAGE FACTOR (empirically 1.20-1.30 depending on league)
+    const homeAdvantage = 1.25; // 25% boost for home team
     
-    // Reduce draw influence from historical data
-    const avgDrawRate = (homeDrawRate + awayDrawRate) / 2;
+    // 5. FIX: CALCULATE EXPECTED GOALS USING CORRECT FORMULA
+    // λ_home = (league avg) × (home attack) × (away defense weakness) × (home advantage)
+    // λ_away = (league avg) × (away attack) × (home defense weakness)
+    const homeExp = avgGoalsPerTeam * homeAttackStrength * awayDefenseWeakness * homeAdvantage;
+    const awayExp = avgGoalsPerTeam * awayAttackStrength * homeDefenseWeakness;
     
-    // 4. ADJUST EXPECTED GOALS BASED ON STRENGTH DIFFERENTIAL
-    // Stronger team gets a bigger boost
-    const strengthImpact = Math.abs(strengthDiff) * 0.5; // How much to adjust
+    console.log('=== CORRECTED Expected Goals Calculation ===');
+    console.log(`Home ${homeTeam}:`);
+    console.log(`  Formula: ${avgGoalsPerTeam.toFixed(2)} × ${homeAttackStrength.toFixed(2)} × ${awayDefenseWeakness.toFixed(2)} × ${homeAdvantage.toFixed(2)}`);
+    console.log(`  Result: ${homeExp.toFixed(2)} xG`);
+    console.log(`Away ${awayTeam}:`);
+    console.log(`  Formula: ${avgGoalsPerTeam.toFixed(2)} × ${awayAttackStrength.toFixed(2)} × ${homeDefenseWeakness.toFixed(2)}`);
+    console.log(`  Result: ${awayExp.toFixed(2)} xG`);
     
-    let homeExpFinal, awayExpFinal;
+    // 6. CALCULATE BASE POISSON PROBABILITIES
+    const baseProbs = calculatePoissonProbabilities(homeExp, awayExp, 10);
     
-    if (strengthDiff > 0) {
-        // Home is stronger
-        homeExpFinal = baseHomeExp * (1 + strengthImpact * 0.3);
-        awayExpFinal = baseAwayExp * (1 - strengthImpact * 0.2);
-    } else {
-        // Away is stronger
-        homeExpFinal = baseHomeExp * (1 - Math.abs(strengthImpact) * 0.2);
-        awayExpFinal = baseAwayExp * (1 + Math.abs(strengthImpact) * 0.3);
-    }
+    // 7. APPLY DIXON-COLES CORRECTION (only this adjustment)
+    const correctedProbs = applyDixonColesCorrection(homeExp, awayExp);
     
-    // Ensure minimum expected goals
-    homeExpFinal = Math.max(0.5, homeExpFinal);
-    awayExpFinal = Math.max(0.5, awayExpFinal);
-    
-    // 5. POISSON PROBABILITIES with higher max goals for better resolution
-    const poissonProbs = calculatePoissonProbabilities(homeExpFinal, awayExpFinal, 10);
-    
-    // 6. REDUCE DRAW BIAS IN POISSON
-    // Draws are overestimated in Poisson, especially for low-scoring matches
-    let adjustedHome = poissonProbs.home;
-    let adjustedDraw = poissonProbs.draw;
-    let adjustedAway = poissonProbs.away;
-    
-    // Reduce draw probability based on expected goals difference
-    const expectedDiff = homeExpFinal - awayExpFinal;
-    const diffFactor = Math.min(Math.abs(expectedDiff) * 0.5, 0.3); // Max 30% reduction
-    
-    if (Math.abs(expectedDiff) > 0.5) { // Only reduce draws if there's a clear favorite
-        adjustedDraw *= (1 - diffFactor);
-        
-        // Redistribute the reduced draw probability to the favorite
-        if (expectedDiff > 0) {
-            adjustedHome += (poissonProbs.draw * diffFactor * 0.7);
-            adjustedAway += (poissonProbs.draw * diffFactor * 0.3);
-        } else {
-            adjustedHome += (poissonProbs.draw * diffFactor * 0.3);
-            adjustedAway += (poissonProbs.draw * diffFactor * 0.7);
+    console.log('Probabilities:', {
+        base: {
+            home: (baseProbs.home * 100).toFixed(1) + '%',
+            draw: (baseProbs.draw * 100).toFixed(1) + '%',
+            away: (baseProbs.away * 100).toFixed(1) + '%'
+        },
+        afterDixonColes: {
+            home: (correctedProbs.home * 100).toFixed(1) + '%',
+            draw: (correctedProbs.draw * 100).toFixed(1) + '%',
+            away: (correctedProbs.away * 100).toFixed(1) + '%'
         }
-    }
-    
-    // 7. APPLY HISTORICAL PERFORMANCE WITH MINIMAL DRAW INFLUENCE
-    const historicalWeight = 0.15;
-    const modelWeight = 0.85;
-    
-    // Use win rates more than draw rates
-    let finalHome = (adjustedHome * modelWeight) + 
-                   (homeWinRate * historicalWeight * 0.8 + (1 - awayWinRate) * historicalWeight * 0.2);
-    
-    let finalAway = (adjustedAway * modelWeight) + 
-                   (awayWinRate * historicalWeight * 0.8 + (1 - homeWinRate) * historicalWeight * 0.2);
-    
-    let finalDraw = (adjustedDraw * modelWeight) + 
-                   (avgDrawRate * historicalWeight * 0.5); // Reduced draw influence
-    
-    // 8. STRENGTH-BASED FINAL ADJUSTMENT
-    // If one team is clearly stronger, reduce draw probability further
-    const clearFavoriteThreshold = 0.3; // 30% strength difference
-    
-    if (Math.abs(strengthDiff) > clearFavoriteThreshold) {
-        const favoriteBoost = Math.min((Math.abs(strengthDiff) - clearFavoriteThreshold) * 0.4, 0.2);
-        const drawReduction = finalDraw * favoriteBoost;
-        
-        if (strengthDiff > 0) {
-            // Home is clear favorite
-            finalHome += (drawReduction * 0.8);
-            finalAway += (drawReduction * 0.2);
-            finalDraw -= drawReduction;
-        } else {
-            // Away is clear favorite
-            finalHome += (drawReduction * 0.2);
-            finalAway += (drawReduction * 0.8);
-            finalDraw -= drawReduction;
-        }
-    }
-    
-    // Normalize to ensure sum = 1
-    const total = finalHome + finalDraw + finalAway;
+    });
     
     return {
-        home: finalHome / total,
-        draw: finalDraw / total,
-        away: finalAway / total,
-        homeExp: homeExpFinal,
-        awayExp: awayExpFinal
+        home: correctedProbs.home,
+        draw: correctedProbs.draw,
+        away: correctedProbs.away,
+        homeExp: homeExp,
+        awayExp: awayExp,
+        leagueAverages: leagueStats
     };
 }
 
@@ -924,6 +953,7 @@ function generatePrediction() {
     // Get expected goals for display
     const adjustedHomeExp = modelResult.homeExp;
     const adjustedAwayExp = modelResult.awayExp;
+    const leagueStats = modelResult.leagueAverages; // Get the league averages
     
     // Try to calculate betting probabilities
     let bettingProbs = calculateBettingProbabilities(homeOdds, drawOdds, awayOdds);
@@ -973,7 +1003,8 @@ function generatePrediction() {
         finalHome, finalDraw, finalAway,
         adjustedHomeExp, adjustedAwayExp,
         homeStats, awayStats,
-        useBettingOdds
+        useBettingOdds,
+        modelResult // Add this parameter for league averages
     );
 }
 
@@ -1017,7 +1048,7 @@ function displayOrganizedPredictionResults(
     // Format percentages
     const formatPercent = (value) => (value * 100).toFixed(1) + '%';
     
-    // Create organized HTML structure
+    // Create organized HTML structure WITHOUT league statistics card
     let html = `
         <!-- Match Header -->
         <div class="prediction-header">
@@ -1050,7 +1081,7 @@ function displayOrganizedPredictionResults(
             </p>
         </div>
         
-                <!-- Probability Breakdown -->
+        <!-- Probability Breakdown -->
         <div class="prediction-card">
             <h4 style="font-size: 1.1rem; font-weight: 600; margin-bottom: 1rem; color: #ffffff;">
                 <i class="fas fa-chart-pie" style="color: #13ec5b; margin-right: 0.5rem;"></i>
@@ -1424,3 +1455,4 @@ function clearLocalStorage() {
         console.warn('Could not clear localStorage:', e);
     }
 }
+

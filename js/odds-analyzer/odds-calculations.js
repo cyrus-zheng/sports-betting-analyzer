@@ -1,5 +1,5 @@
 // Odds Calculation Functions
-// ===========================
+// =================================================
 
 // Calculate implied probability from decimal odds
 function calculateImpliedProbability(decimalOdds) {

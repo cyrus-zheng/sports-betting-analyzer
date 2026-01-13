@@ -1,5 +1,5 @@
 // UI Event Handlers
-// =================
+// =================================================
 
 // Set up all event listeners
 function setupEventListeners() {
@@ -27,6 +27,17 @@ function setupEventListeners() {
     
     // Run demo analysis
     document.getElementById('runDemoBtn').addEventListener('click', runDemoAnalysis);
+    
+    // API Integration event listeners
+    document.getElementById('saveApiKeyBtn').addEventListener('click', handleSaveApiKey);
+    document.getElementById('sportSelector').addEventListener('change', handleSportSelection);
+    document.getElementById('loadFromApiBtn').addEventListener('click', handleLoadFromApi);
+    
+    // Initialize API section if key exists
+    if (apiKey) {
+        document.getElementById('apiKeyInput').value = apiKey;
+        initializeApiSection();
+    }
 }
 
 // Add a new outcome row

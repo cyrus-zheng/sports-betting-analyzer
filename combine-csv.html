@@ -1,0 +1,426 @@
+<!DOCTYPE html>
+<html lang="en" class="dark">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>CSV Combiner</title>
+    
+    <!-- Fonts -->
+    <link href="https://fonts.googleapis.com" rel="preconnect">
+    <link crossorigin href="https://fonts.gstatic.com" rel="preconnect">
+    <link href="https://fonts.googleapis.com/css2?family=Lexend:wght@300;400;500;700;900&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    
+    <!-- Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+    <script>
+        tailwind.config = {
+            darkMode: "class",
+            theme: {
+                extend: {
+                    colors: {
+                        "primary": "#13ec5b",
+                        "background-light": "#f6f8f6",
+                        "background-dark": "#102216",
+                        "surface-dark": "#193322",
+                        "border-dark": "#326744",
+                    },
+                    fontFamily: {
+                        "display": ["Lexend", "sans-serif"],
+                        "sans": ["Lexend", "sans-serif"]
+                    },
+                    borderRadius: {
+                        "DEFAULT": "0.5rem",
+                        "lg": "0.75rem",
+                        "xl": "1rem",
+                        "2xl": "1.5rem",
+                        "full": "9999px"
+                    },
+                },
+            },
+        }
+    </script>
+    <link rel="stylesheet" href="css/combine-csv.css">
+    <style>
+        /* Fix for file upload areas */
+        .file-upload-area {
+            cursor: pointer !important;
+            position: relative;
+        }
+        
+        .file-upload-area:hover {
+            border-color: rgba(19, 236, 91, 0.5) !important;
+            background-color: rgba(19, 236, 91, 0.05);
+        }
+        
+        /* Make sure file inputs are clickable */
+        #overallFile, #homeFile, #awayFile, #recentFormFile, #recentHomeFile, #recentAwayFile {
+            cursor: pointer !important;
+        }
+        
+        /* Remove any default browser styling that might interfere */
+        input[type="file"]::-webkit-file-upload-button {
+            cursor: pointer;
+        }
+        
+        input[type="file"]::file-selector-button {
+            cursor: pointer;
+        }
+    </style>
+</head>
+<body class="font-display bg-background-light dark:bg-background-dark text-slate-900 dark:text-white antialiased overflow-x-hidden">
+    <!-- Header Section -->
+    <header class="bg-surface-dark border-b border-border-dark">
+        <div class="container mx-auto px-4 py-6">
+            <div class="flex flex-col md:flex-row justify-between items-center gap-4">
+                <div class="flex items-center gap-4">
+                    <a href="index.html" class="w-12 h-12 rounded-xl bg-primary/10 flex items-center justify-center text-primary border border-primary/20 hover:bg-primary hover:text-background-dark transition-all duration-300 hover:scale-105 group">
+                        <i class="fas fa-futbol text-xl group-hover:rotate-12 transition-transform duration-300"></i>
+                    </a>
+                    <div>
+                        <h1 class="text-2xl md:text-3xl font-bold">CSV Combiner</h1>
+                        <p class="text-slate-400 dark:text-slate-400 text-sm md:text-base">
+                            Combine football statistics from multiple CSV files
+                        </p>
+                    </div>
+                </div>
+                <a href="prediction.html" class="px-4 py-2 bg-primary/20 text-primary font-medium rounded-lg hover:bg-primary/30 transition-colors duration-300 flex items-center gap-2 border border-primary/20">
+                    <i class="fas fa-arrow-left"></i>
+                    Back to Predictor
+                </a>
+            </div>
+        </div>
+    </header>
+    
+    <div class="container mx-auto px-4 py-8">
+        <!-- Navigation Section -->
+        <div class="flex gap-2 mb-8 flex-wrap">
+            <a href="odds-analyzer.html" class="px-6 py-3 bg-surface-dark text-slate-300 font-bold rounded-lg flex items-center gap-2 border border-border-dark hover:bg-primary hover:text-background-dark transition-colors duration-300">
+                <i class="fas fa-calculator"></i>
+                Odds Analyzer
+            </a>
+            <a href="prediction.html" class="px-6 py-3 bg-surface-dark text-slate-300 font-bold rounded-lg flex items-center gap-2 border border-border-dark hover:bg-primary hover:text-background-dark transition-colors duration-300">
+                <i class="fas fa-futbol"></i>
+                Soccer Predictor
+            </a>
+            <a href="fixtures.html" class="px-6 py-3 bg-surface-dark text-slate-300 font-bold rounded-lg flex items-center gap-2 border border-border-dark hover:bg-primary hover:text-background-dark transition-colors duration-300">
+                <i class="fas fa-calendar-alt"></i>
+                Today's Fixtures
+            </a>
+            <a href="combine-csv.html" class="px-6 py-3 bg-primary text-background-dark font-bold rounded-lg flex items-center gap-2">
+                <i class="fas fa-file-csv"></i>
+                CSV Combiner
+            </a>
+        </div>
+        
+        <!-- Main Content -->
+        <div class="grid grid-cols-1 lg:grid-cols-2 gap-8">
+            <!-- Left Column - Upload Section -->
+            <div class="space-y-8">
+                <!-- Upload Cards -->
+                <div class="group relative overflow-hidden rounded-2xl border border-gray-200 dark:border-border-dark bg-white dark:bg-surface-dark p-6 transition-all duration-300 hover:border-primary/50 hover:shadow-[0_0_30px_rgba(19,236,91,0.1)]">
+                    <h2 class="text-2xl font-bold mb-6 text-slate-900 dark:text-white flex items-center gap-2">
+                        <i class="fas fa-upload text-primary"></i>
+                        Upload CSV Files (6 Required)
+                    </h2>
+                    
+                    <div class="space-y-6">
+                        <!-- Overall Table -->
+                        <div class="upload-card">
+                            <div class="flex items-center gap-3 mb-3">
+                                <div class="w-10 h-10 rounded-full bg-primary/10 flex items-center justify-center">
+                                    <i class="fas fa-table text-primary"></i>
+                                </div>
+                                <div>
+                                    <h3 class="font-bold text-lg text-slate-900 dark:text-white">Overall Table</h3>
+                                    <p class="text-slate-600 dark:text-slate-400 text-sm">Complete season statistics</p>
+                                </div>
+                            </div>
+                            <div class="relative">
+                                <div class="file-upload-area border-2 border-dashed border-gray-300 dark:border-border-dark rounded-lg p-4 text-center cursor-pointer hover:border-primary/50 transition-all duration-300" id="overallUpload">
+                                    <div class="file-upload-icon mb-2">
+                                        <i class="fas fa-file-csv text-2xl text-primary"></i>
+                                    </div>
+                                    <p class="font-bold text-slate-900 dark:text-white">Click to upload</p>
+                                    <p class="text-slate-600 dark:text-slate-400 text-xs mt-1">Overall season table (e.g., "Overall Table.csv")</p>
+                                </div>
+                                <input type="file" id="overallFile" accept=".csv" class="absolute top-0 left-0 w-full h-full opacity-0 cursor-pointer z-10">
+                            </div>
+                            <div class="file-list mt-2" id="overallFileList"></div>
+                        </div>
+
+                        <!-- Overall Home Table -->
+                        <div class="upload-card">
+                            <div class="flex items-center gap-3 mb-3">
+                                <div class="w-10 h-10 rounded-full bg-primary/10 flex items-center justify-center">
+                                    <i class="fas fa-home text-primary"></i>
+                                </div>
+                                <div>
+                                    <h3 class="font-bold text-lg text-slate-900 dark:text-white">Overall Home Table</h3>
+                                    <p class="text-slate-600 dark:text-slate-400 text-sm">Home matches statistics</p>
+                                </div>
+                            </div>
+                            <div class="relative">
+                                <div class="file-upload-area border-2 border-dashed border-gray-300 dark:border-border-dark rounded-lg p-4 text-center cursor-pointer hover:border-primary/50 transition-all duration-300" id="homeUpload">
+                                    <div class="file-upload-icon mb-2">
+                                        <i class="fas fa-file-csv text-2xl text-primary"></i>
+                                    </div>
+                                    <p class="font-bold text-slate-900 dark:text-white">Click to upload</p>
+                                    <p class="text-slate-600 dark:text-slate-400 text-xs mt-1">Home table (e.g., "Overall Home Table.csv")</p>
+                                </div>
+                                <input type="file" id="homeFile" accept=".csv" class="absolute top-0 left-0 w-full h-full opacity-0 cursor-pointer z-10">
+                            </div>
+                            <div class="file-list mt-2" id="homeFileList"></div>
+                        </div>
+
+                        <!-- Overall Away Table -->
+                        <div class="upload-card">
+                            <div class="flex items-center gap-3 mb-3">
+                                <div class="w-10 h-10 rounded-full bg-primary/10 flex items-center justify-center">
+                                    <i class="fas fa-plane text-primary"></i>
+                                </div>
+                                <div>
+                                    <h3 class="font-bold text-lg text-slate-900 dark:text-white">Overall Away Table</h3>
+                                    <p class="text-slate-600 dark:text-slate-400 text-sm">Away matches statistics</p>
+                                </div>
+                            </div>
+                            <div class="relative">
+                                <div class="file-upload-area border-2 border-dashed border-gray-300 dark:border-border-dark rounded-lg p-4 text-center cursor-pointer hover:border-primary/50 transition-all duration-300" id="awayUpload">
+                                    <div class="file-upload-icon mb-2">
+                                        <i class="fas fa-file-csv text-2xl text-primary"></i>
+                                    </div>
+                                    <p class="font-bold text-slate-900 dark:text-white">Click to upload</p>
+                                    <p class="text-slate-600 dark:text-slate-400 text-xs mt-1">Away table (e.g., "Overall Away Table.csv")</p>
+                                </div>
+                                <input type="file" id="awayFile" accept=".csv" class="absolute top-0 left-0 w-full h-full opacity-0 cursor-pointer z-10">
+                            </div>
+                            <div class="file-list mt-2" id="awayFileList"></div>
+                        </div>
+
+                        <!-- Overall Recent Form Table (Last 5) -->
+                        <div class="upload-card">
+                            <div class="flex items-center gap-3 mb-3">
+                                <div class="w-10 h-10 rounded-full bg-primary/10 flex items-center justify-center">
+                                    <i class="fas fa-chart-line text-primary"></i>
+                                </div>
+                                <div>
+                                    <h3 class="font-bold text-lg text-slate-900 dark:text-white">Overall Recent Form (Last 5)</h3>
+                                    <p class="text-slate-600 dark:text-slate-400 text-sm">Last 5 matches overall</p>
+                                </div>
+                            </div>
+                            <div class="relative">
+                                <div class="file-upload-area border-2 border-dashed border-gray-300 dark:border-border-dark rounded-lg p-4 text-center cursor-pointer hover:border-primary/50 transition-all duration-300" id="recentFormUpload">
+                                    <div class="file-upload-icon mb-2">
+                                        <i class="fas fa-file-csv text-2xl text-primary"></i>
+                                    </div>
+                                    <p class="font-bold text-slate-900 dark:text-white">Click to upload</p>
+                                    <p class="text-slate-600 dark:text-slate-400 text-xs mt-1">Recent form table (e.g., "Overall Recent Form Table.csv")</p>
+                                </div>
+                                <input type="file" id="recentFormFile" accept=".csv" class="absolute top-0 left-0 w-full h-full opacity-0 cursor-pointer z-10">
+                            </div>
+                            <div class="file-list mt-2" id="recentFormFileList"></div>
+                        </div>
+
+                        <!-- Recent Form Home Table -->
+                        <div class="upload-card">
+                            <div class="flex items-center gap-3 mb-3">
+                                <div class="w-10 h-10 rounded-full bg-primary/10 flex items-center justify-center">
+                                    <i class="fas fa-home text-primary"></i>
+                                    <i class="fas fa-clock ml-[-8px] text-xs text-primary"></i>
+                                </div>
+                                <div>
+                                    <h3 class="font-bold text-lg text-slate-900 dark:text-white">Recent Form Home Table</h3>
+                                    <p class="text-slate-600 dark:text-slate-400 text-sm">Last 3 home matches</p>
+                                </div>
+                            </div>
+                            <div class="relative">
+                                <div class="file-upload-area border-2 border-dashed border-gray-300 dark:border-border-dark rounded-lg p-4 text-center cursor-pointer hover:border-primary/50 transition-all duration-300" id="recentHomeUpload">
+                                    <div class="file-upload-icon mb-2">
+                                        <i class="fas fa-file-csv text-2xl text-primary"></i>
+                                    </div>
+                                    <p class="font-bold text-slate-900 dark:text-white">Click to upload</p>
+                                    <p class="text-slate-600 dark:text-slate-400 text-xs mt-1">Recent home form (e.g., "Recent Form Home Table.csv")</p>
+                                </div>
+                                <input type="file" id="recentHomeFile" accept=".csv" class="absolute top-0 left-0 w-full h-full opacity-0 cursor-pointer z-10">
+                            </div>
+                            <div class="file-list mt-2" id="recentHomeFileList"></div>
+                        </div>
+
+                        <!-- Recent Form Away Table -->
+                        <div class="upload-card">
+                            <div class="flex items-center gap-3 mb-3">
+                                <div class="w-10 h-10 rounded-full bg-primary/10 flex items-center justify-center">
+                                    <i class="fas fa-plane text-primary"></i>
+                                    <i class="fas fa-clock ml-[-8px] text-xs text-primary"></i>
+                                </div>
+                                <div>
+                                    <h3 class="font-bold text-lg text-slate-900 dark:text-white">Recent Form Away Table</h3>
+                                    <p class="text-slate-600 dark:text-slate-400 text-sm">Last 3 away matches</p>
+                                </div>
+                            </div>
+                            <div class="relative">
+                                <div class="file-upload-area border-2 border-dashed border-gray-300 dark:border-border-dark rounded-lg p-4 text-center cursor-pointer hover:border-primary/50 transition-all duration-300" id="recentAwayUpload">
+                                    <div class="file-upload-icon mb-2">
+                                        <i class="fas fa-file-csv text-2xl text-primary"></i>
+                                    </div>
+                                    <p class="font-bold text-slate-900 dark:text-white">Click to upload</p>
+                                    <p class="text-slate-600 dark:text-slate-400 text-xs mt-1">Recent away form (e.g., "Recent Form Away Table.csv")</p>
+                                </div>
+                                <input type="file" id="recentAwayFile" accept=".csv" class="absolute top-0 left-0 w-full h-full opacity-0 cursor-pointer z-10">
+                            </div>
+                            <div class="file-list mt-2" id="recentAwayFileList"></div>
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- Instructions -->
+                <div class="group relative overflow-hidden rounded-2xl border border-gray-200 dark:border-border-dark bg-white dark:bg-surface-dark p-6 transition-all duration-300 hover:border-primary/50 hover:shadow-[0_0_30px_rgba(19,236,91,0.1)]">
+                    <h2 class="text-2xl font-bold mb-6 text-slate-900 dark:text-white flex items-center gap-2">
+                        <i class="fas fa-info-circle text-primary"></i>
+                        Instructions
+                    </h2>
+                    
+                    <div class="space-y-4">
+                        <div class="bg-primary/10 border border-primary/20 rounded-lg p-4">
+                            <h4 class="font-bold text-primary mb-2">Required Files (6):</h4>
+                            <ol class="list-decimal list-inside space-y-2 text-sm text-slate-700 dark:text-slate-300">
+                                <li><strong>Overall Table:</strong> Complete season statistics for all teams</li>
+                                <li><strong>Overall Home Table:</strong> Home match statistics</li>
+                                <li><strong>Overall Away Table:</strong> Away match statistics</li>
+                                <li><strong>Overall Recent Form Table:</strong> Last 5 matches overall</li>
+                                <li><strong>Recent Form Home Table:</strong> Last 3 home matches</li>
+                                <li><strong>Recent Form Away Table:</strong> Last 3 away matches</li>
+                            </ol>
+                        </div>
+                        
+                        <div class="bg-blue-500/10 border border-blue-500/20 rounded-lg p-4">
+                            <h4 class="font-bold text-blue-500 mb-2">File Format:</h4>
+                            <ul class="list-disc list-inside space-y-2 text-sm text-slate-700 dark:text-slate-300">
+                                <li>CSV files with semicolon (;) delimiter</li>
+                                <li>Headers: number, team, matches, wins, draws, loses, goals, ga, points, xG, xGA, xPTS</li>
+                                <li>Team names must be consistent across all files</li>
+                                <li>20 teams expected (Premier League format)</li>
+                            </ul>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Right Column - Processing & Download -->
+            <div class="space-y-8">
+                <!-- Combine Button -->
+                <div class="group relative overflow-hidden rounded-2xl border border-gray-200 dark:border-border-dark bg-white dark:bg-surface-dark p-6 transition-all duration-300 hover:border-primary/50 hover:shadow-[0_0_30px_rgba(19,236,91,0.1)]">
+                    <h2 class="text-2xl font-bold mb-6 text-slate-900 dark:text-white flex items-center gap-2">
+                        <i class="fas fa-cogs text-primary"></i>
+                        Process & Combine
+                    </h2>
+                    
+                    <div class="space-y-6">
+                        <button id="combineBtn" class="w-full py-4 bg-primary text-background-dark font-bold rounded-lg hover:bg-primary/90 transition-colors duration-300 flex items-center gap-2 justify-center text-lg" disabled>
+                            <i class="fas fa-magic"></i>
+                            Combine 6 CSV Files
+                        </button>
+                        
+                        <div class="loading text-center py-4" id="loadingIndicator" style="display: none;">
+                            <div class="loading-spinner mx-auto mb-4"></div>
+                            <p class="text-slate-600 dark:text-slate-400">Processing and combining data...</p>
+                        </div>
+                        
+                        <div id="statusMessage" class="hidden p-4 rounded-lg border"></div>
+                        
+                        <div class="bg-yellow-500/10 border border-yellow-500/20 rounded-lg p-4">
+                            <div class="flex items-center gap-2 mb-2">
+                                <i class="fas fa-exclamation-circle text-yellow-500"></i>
+                                <h4 class="font-bold text-yellow-500">Note:</h4>
+                            </div>
+                            <p class="text-slate-700 dark:text-slate-300 text-sm">
+                                All 6 files must be uploaded before combining. Files should follow the Premier League format you provided.
+                            </p>
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- Download Section -->
+                <div id="downloadSection" class="group relative overflow-hidden rounded-2xl border border-gray-200 dark:border-border-dark bg-white dark:bg-surface-dark p-6 transition-all duration-300 hover:border-primary/50 hover:shadow-[0_0_30px_rgba(19,236,91,0.1)]" style="display: none;">
+                    <h2 class="text-2xl font-bold mb-6 text-slate-900 dark:text-white flex items-center gap-2">
+                        <i class="fas fa-download text-primary"></i>
+                        Download Combined CSV
+                    </h2>
+                    
+                    <div class="space-y-6">
+                        <div class="bg-green-500/10 border border-green-500/20 rounded-lg p-4">
+                            <div class="flex items-center gap-3 mb-2">
+                                <i class="fas fa-check-circle text-green-500 text-xl"></i>
+                                <h4 class="font-bold text-green-500">Files Combined Successfully!</h4>
+                            </div>
+                            <p class="text-slate-700 dark:text-slate-300 text-sm">
+                                All 6 CSV files have been combined and processed. Download the combined file below.
+                            </p>
+                        </div>
+                        
+                        <div class="bg-primary/5 border border-primary/10 rounded-lg p-4">
+                            <div class="flex items-center justify-between mb-3">
+                                <div>
+                                    <h4 class="font-bold text-slate-900 dark:text-white">Combined File Details</h4>
+                                    <p class="text-slate-600 dark:text-slate-400 text-sm" id="fileDetails">Processing...</p>
+                                </div>
+                                <i class="fas fa-file-csv text-primary text-2xl"></i>
+                            </div>
+                            <div class="text-xs text-slate-600 dark:text-slate-400">
+                                <div class="flex justify-between mb-1">
+                                    <span>Teams Combined:</span>
+                                    <span id="teamCount">0</span>
+                                </div>
+                                <div class="flex justify-between mb-1">
+                                    <span>Total Columns:</span>
+                                    <span id="columnCount">0</span>
+                                </div>
+                                <div class="flex justify-between">
+                                    <span>File Size:</span>
+                                    <span id="fileSize">0 KB</span>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <button id="downloadBtn" class="w-full py-4 bg-primary text-background-dark font-bold rounded-lg hover:bg-primary/90 transition-colors duration-300 flex items-center gap-2 justify-center text-lg">
+                            <i class="fas fa-download"></i>
+                            Download Combined CSV
+                        </button>
+                        
+                        <div class="text-center">
+                            <button id="resetBtn" class="text-slate-600 dark:text-slate-400 hover:text-primary transition-colors duration-300">
+                                <i class="fas fa-redo mr-2"></i>
+                                Combine More Files
+                            </button>
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- Preview Section -->
+                <div id="previewSection" class="group relative overflow-hidden rounded-2xl border border-gray-200 dark:border-border-dark bg-white dark:bg-surface-dark p-6 transition-all duration-300 hover:border-primary/50 hover:shadow-[0_0_30px_rgba(19,236,91,0.1)]" style="display: none;">
+                    <h2 class="text-2xl font-bold mb-6 text-slate-900 dark:text-white flex items-center gap-2">
+                        <i class="fas fa-eye text-primary"></i>
+                        Data Preview
+                    </h2>
+                    
+                    <div class="space-y-4">
+                        <div class="bg-surface-dark rounded-lg p-4 max-h-60 overflow-y-auto">
+                            <pre id="dataPreview" class="text-xs text-slate-300 font-mono whitespace-pre-wrap"></pre>
+                        </div>
+                        <p class="text-slate-600 dark:text-slate-400 text-sm text-center">
+                            First 3 rows of combined data shown above
+                        </p>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <!-- Footer -->
+        <div class="mt-12 text-center text-slate-600 dark:text-slate-400 text-sm">
+            <p>CSV Combiner Tool • Premier League Statistics • Part of SportsAI Prediction Suite</p>
+        </div>
+    </div>
+    
+    <script src="js/combine-csv.js"></script>
+</body>
+</html>

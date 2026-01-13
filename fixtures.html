@@ -1,0 +1,123 @@
+<!DOCTYPE html>
+<html lang="en" class="dark">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Today's Fixtures | Soccer Match Predictor</title>
+    
+    <!-- Fonts -->
+    <link href="https://fonts.googleapis.com" rel="preconnect">
+    <link crossorigin href="https://fonts.gstatic.com" rel="preconnect">
+    <link href="https://fonts.googleapis.com/css2?family=Lexend:wght@300;400;500;700;900&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    
+    <!-- Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+    <script>
+        tailwind.config = {
+            darkMode: "class",
+            theme: {
+                extend: {
+                    colors: {
+                        "primary": "#13ec5b",
+                        "background-light": "#f6f8f6",
+                        "background-dark": "#102216",
+                        "surface-dark": "#193322",
+                        "border-dark": "#326744",
+                    },
+                    fontFamily: {
+                        "display": ["Lexend", "sans-serif"],
+                        "sans": ["Lexend", "sans-serif"]
+                    },
+                    borderRadius: {
+                        "DEFAULT": "0.5rem",
+                        "lg": "0.75rem",
+                        "xl": "1rem",
+                        "2xl": "1.5rem",
+                        "full": "9999px"
+                    },
+                },
+            },
+        }
+    </script>
+    <link rel="stylesheet" href="css/prediction.css">
+    <link rel="stylesheet" href="css/fixtures.css">
+</head>
+<body class="font-display bg-background-light dark:bg-background-dark text-slate-900 dark:text-white antialiased overflow-x-hidden">
+    <!-- Header Section -->
+    <header class="bg-surface-dark border-b border-border-dark">
+        <div class="container mx-auto px-4 py-6">
+            <div class="flex flex-col md:flex-row justify-between items-center gap-4">
+                <div class="flex items-center gap-4">
+                    <a href="index.html" class="w-12 h-12 rounded-xl bg-primary/10 flex items-center justify-center text-primary border border-primary/20 hover:bg-primary hover:text-background-dark transition-all duration-300 hover:scale-105 group">
+                        <i class="fas fa-futbol text-xl group-hover:rotate-12 transition-transform duration-300"></i>
+                    </a>
+                    <div>
+                        <h1 class="text-2xl md:text-3xl font-bold">Today's Fixtures</h1>
+                        <p class="text-slate-400 dark:text-slate-400 text-sm md:text-base">
+                            Automatic predictions for scheduled matches
+                        </p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </header>
+    
+    <div class="container mx-auto px-4 py-6">
+        <!-- Navigation Section -->
+        <div class="flex gap-2 mb-8">
+            <a href="odds-analyzer.html" class="px-6 py-3 bg-surface-dark text-slate-300 font-bold rounded-lg flex items-center gap-2 border border-border-dark hover:bg-primary hover:text-background-dark transition-colors duration-300">
+                <i class="fas fa-calculator"></i>
+                Odds Analyzer
+            </a>
+            <a href="prediction.html" class="px-6 py-3 bg-surface-dark text-slate-300 font-bold rounded-lg flex items-center gap-2 border border-border-dark hover:bg-primary hover:text-background-dark transition-colors duration-300">
+                <i class="fas fa-futbol"></i>
+                Soccer Predictor
+            </a>
+            <a href="fixtures.html" class="px-6 py-3 bg-primary text-background-dark font-bold rounded-lg flex items-center gap-2">
+                <i class="fas fa-calendar-alt"></i>
+                Today's Fixtures
+            </a>
+            <a href="combine-csv.html" class="px-6 py-3 bg-surface-dark text-slate-300 font-bold rounded-lg flex items-center gap-2 border border-border-dark hover:bg-primary hover:text-background-dark transition-colors duration-300">
+                <i class="fas fa-file-csv"></i>
+                CSV Combiner
+            </a>
+        </div>
+
+        <!-- Loading Indicator -->
+        <div id="loadingIndicator" class="loading-indicator" style="display: none;">
+            <div class="loading-spinner"></div>
+            <p class="text-slate-400 mt-4">Loading fixtures and calculating predictions...</p>
+        </div>
+
+        <!-- Error Display -->
+        <div id="errorDisplay" class="error-display" style="display: none;">
+            <div class="group relative overflow-hidden rounded-2xl border border-red-500/50 bg-red-500/10 p-6">
+                <div class="flex items-center gap-3 text-red-500">
+                    <i class="fas fa-exclamation-circle text-2xl"></i>
+                    <div>
+                        <h3 class="font-bold text-lg">Error Loading Fixtures</h3>
+                        <p id="errorMessage" class="text-sm mt-1"></p>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Fixtures Container -->
+        <div id="fixturesContainer" class="fixtures-container">
+            <!-- Fixtures will be dynamically inserted here -->
+        </div>
+
+        <!-- No Fixtures Message -->
+        <div id="noFixtures" class="no-fixtures" style="display: none;">
+            <div class="group relative overflow-hidden rounded-2xl border border-gray-200 dark:border-border-dark bg-white dark:bg-surface-dark p-12 text-center">
+                <i class="fas fa-calendar-times text-6xl text-slate-400 mb-4"></i>
+                <h3 class="text-2xl font-bold mb-2">No Fixtures Available</h3>
+                <p class="text-slate-400">There are no scheduled matches for today.</p>
+            </div>
+        </div>
+    </div>
+
+    <script src="js/fixtures.js"></script>
+</body>
+</html>

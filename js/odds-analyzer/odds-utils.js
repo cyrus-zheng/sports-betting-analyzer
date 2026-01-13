@@ -1,5 +1,5 @@
 // Odds Utility Functions
-// =======================
+// =================================================
 
 // Parse odds input (supports American and decimal formats)
 function parseOdds(oddsStr) {

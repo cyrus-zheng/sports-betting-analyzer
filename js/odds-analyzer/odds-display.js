@@ -1,5 +1,5 @@
 // Results Display Functions
-// =========================
+// =================================================
 
 // Display analysis results
 function displayAnalysisResults(eventName, marketType, outcomes) {

@@ -1,0 +1,404 @@
+/* Fixtures Styles */
+
+/* Loading Spinner */
+.loading-indicator {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    padding: 4rem 2rem;
+}
+
+.loading-spinner {
+    width: 40px;
+    height: 40px;
+    border: 3px solid rgba(19, 236, 91, 0.1);
+    border-top: 3px solid #13ec5b;
+    border-radius: 50%;
+    animation: spin 1s linear infinite;
+}
+
+@keyframes spin {
+    0% { transform: rotate(0deg); }
+    100% { transform: rotate(360deg); }
+}
+
+/* Fixtures Container */
+.fixtures-container {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 1.5rem;
+    margin-bottom: 2rem;
+}
+
+@media (max-width: 768px) {
+    .fixtures-container {
+        grid-template-columns: 1fr;
+    }
+}
+
+/* Fixture Card */
+.fixture-card {
+    position: relative;
+    overflow: hidden;
+    border-radius: 1rem;
+    border: 1px solid rgba(50, 103, 68, 0.5);
+    background: linear-gradient(135deg, #193322 0%, #102216 100%);
+    transition: all 0.3s ease;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
+}
+
+.fixture-card:hover {
+    border-color: #13ec5b;
+    box-shadow: 0 0 30px rgba(19, 236, 91, 0.2);
+    transform: translateY(-4px);
+}
+
+/* Fixture Header */
+.fixture-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 0.875rem 1rem;
+    border-bottom: 1px solid rgba(50, 103, 68, 0.3);
+    background: rgba(19, 236, 91, 0.05);
+}
+
+.league-badge {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.375rem;
+    padding: 0.375rem 0.625rem;
+    border-radius: 0.375rem;
+    font-weight: 600;
+    font-size: 0.75rem;
+    background: rgba(19, 236, 91, 0.1);
+    color: #13ec5b;
+    border: 1px solid rgba(19, 236, 91, 0.2);
+}
+
+.league-badge i {
+    font-size: 0.875rem;
+}
+
+.prediction-badge {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    text-align: center;
+    padding: 0.375rem 0.625rem;
+    border-radius: 0.375rem;
+    font-weight: 700;
+    font-size: 0.75rem;
+    background: rgba(19, 236, 91, 0.15);
+    color: #13ec5b;
+    border: 1px solid rgba(19, 236, 91, 0.3);
+    line-height: 1.3;
+}
+
+/* Fixture Content */
+.fixture-content {
+    padding: 1rem;
+}
+
+.match-title {
+    font-size: 1.125rem;
+    font-weight: 700;
+    color: #ffffff;
+    margin-bottom: 0.875rem;
+    text-align: center;
+    line-height: 1.3;
+}
+
+/* Expected Goals Display */
+.expected-goals-display {
+    display: flex;
+    flex-direction: row;
+    align-items: center;
+    justify-content: center;
+    gap: 0.5rem;
+    margin-bottom: 1rem;
+}
+
+.expected-goals-label {
+    font-size: 0.7rem;
+    color: #a0a0a0;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+    font-weight: 600;
+}
+
+.expected-goals-value {
+    font-size: 1rem;
+    font-weight: 700;
+    color: #ffffff;
+}
+
+/* Probabilities Grid */
+.probabilities-grid {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 0.5rem;
+    margin-bottom: 0.875rem;
+}
+
+.probability-item {
+    text-align: center;
+    padding: 0.625rem 0.5rem;
+    border-radius: 0.5rem;
+    background: rgba(255, 255, 255, 0.03);
+    border: 1px solid rgba(255, 255, 255, 0.05);
+    transition: all 0.3s ease;
+}
+
+.probability-item.winner {
+    background: rgba(19, 236, 91, 0.1);
+    border-color: rgba(19, 236, 91, 0.3);
+}
+
+.probability-label {
+    font-size: 0.7rem;
+    color: #a0a0a0;
+    margin-bottom: 0.25rem;
+    font-weight: 500;
+}
+
+.probability-value {
+    font-size: 1.125rem;
+    font-weight: 700;
+    color: #ffffff;
+}
+
+.probability-item.winner .probability-value {
+    color: #13ec5b;
+}
+
+/* Prediction Outcome */
+.prediction-outcome {
+    text-align: center;
+    padding: 0.625rem 0.75rem;
+    border-radius: 0.5rem;
+    background: rgba(19, 236, 91, 0.08);
+    border: 1px solid rgba(19, 236, 91, 0.2);
+}
+
+.outcome-text {
+    font-size: 0.875rem;
+    font-weight: 700;
+    color: #13ec5b;
+    margin-bottom: 0.125rem;
+}
+
+.confidence-text {
+    font-size: 0.7rem;
+    color: #ffffff;
+}
+
+/* Form Section */
+.form-section {
+    border-top: 1px solid rgba(50, 103, 68, 0.3);
+    padding: 1rem;
+    background: rgba(19, 236, 91, 0.03);
+}
+
+.form-title {
+    display: flex;
+    align-items: center;
+    gap: 0.375rem;
+    font-size: 0.75rem;
+    font-weight: 700;
+    color: #13ec5b;
+    margin-bottom: 0.875rem;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+}
+
+.form-title i {
+    font-size: 0.875rem;
+}
+
+/* Form Comparison */
+.form-comparison {
+    display: grid;
+    grid-template-columns: 1fr auto 1fr;
+    gap: 0.75rem;
+    align-items: center;
+}
+
+@media (max-width: 640px) {
+    .form-comparison {
+        grid-template-columns: 1fr;
+        gap: 0.75rem;
+    }
+}
+
+.form-team {
+    padding: 0.625rem 0.75rem;
+    border-radius: 0.5rem;
+    background: rgba(255, 255, 255, 0.03);
+    border: 1px solid rgba(255, 255, 255, 0.05);
+}
+
+.form-team.home {
+    border-left: 2px solid #13ec5b;
+}
+
+.form-team.away {
+    border-left: 2px solid #b71c1c;
+}
+
+.form-team-name {
+    font-size: 0.8rem;
+    font-weight: 700;
+    color: #ffffff;
+    margin-bottom: 0.5rem;
+}
+
+.form-stat {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 0.375rem;
+    font-size: 0.7rem;
+}
+
+.form-stat:last-child {
+    margin-bottom: 0;
+}
+
+.form-stat-label {
+    color: #a0a0a0;
+    font-weight: 500;
+}
+
+.form-stat-value {
+    color: #ffffff;
+    font-weight: 600;
+}
+
+/* Form Status Colors */
+.form-excellent {
+    color: #13ec5b !important;
+}
+
+.form-good {
+    color: #10b981 !important;
+}
+
+.form-average {
+    color: #f59e0b !important;
+}
+
+.form-poor {
+    color: #f97316 !important;
+}
+
+.form-very-poor {
+    color: #ef4444 !important;
+}
+
+/* VS Divider */
+.vs-divider {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 0.5rem;
+}
+
+.vs-text {
+    font-size: 0.875rem;
+    font-weight: 700;
+    color: #ffffff;
+    background: rgba(19, 236, 91, 0.15);
+    border: 2px solid rgba(19, 236, 91, 0.3);
+    border-radius: 50%;
+    width: 2rem;
+    height: 2rem;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.form-advantage-box {
+    text-align: center;
+}
+
+.form-advantage-value {
+    font-size: 0.7rem;
+    font-weight: 700;
+    padding: 0.25rem 0.5rem;
+    border-radius: 0.375rem;
+    background: rgba(255, 255, 255, 0.05);
+    border: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+.form-advantage-value.positive {
+    color: #13ec5b;
+    background: rgba(19, 236, 91, 0.1);
+    border-color: rgba(19, 236, 91, 0.2);
+}
+
+.form-advantage-value.negative {
+    color: #ef4444;
+    background: rgba(239, 68, 68, 0.1);
+    border-color: rgba(239, 68, 68, 0.2);
+}
+
+.form-advantage-value.neutral {
+    color: #757575;
+}
+
+/* Error Display */
+.error-display {
+    margin-bottom: 2rem;
+}
+
+/* No Fixtures */
+.no-fixtures {
+    margin-bottom: 2rem;
+}
+
+/* Animation for fixture cards */
+@keyframes fadeInUp {
+    from {
+        opacity: 0;
+        transform: translateY(20px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+.fixture-card {
+    animation: fadeInUp 0.4s ease-out;
+}
+
+/* Responsive adjustments */
+@media (max-width: 640px) {
+    .match-title {
+        font-size: 1rem;
+    }
+    
+    .expected-goals-value {
+        font-size: 1rem;
+    }
+    
+    .expected-goals-label {
+        font-size: 0.65rem;
+    }
+    
+    .probabilities-grid {
+        grid-template-columns: 1fr;
+        gap: 0.375rem;
+    }
+    
+    .vs-divider {
+        transform: rotate(90deg);
+        margin: 0.5rem 0;
+    }
+    
+    .form-stat {
+        font-size: 0.65rem;
+    }
+}

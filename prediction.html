@@ -1,10 +1,9 @@
-
 <!DOCTYPE html>
 <html lang="en" class="dark">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Soccer Match Predictor | SportsAI</title>
+    <title>Soccer Match Predictor</title>
     
     <!-- Fonts -->
     <link href="https://fonts.googleapis.com" rel="preconnect">
@@ -261,6 +260,28 @@
         .comparison-table tr:hover {
             background-color: rgba(19, 236, 91, 0.05);
         }
+        
+        /* Form rating colors */
+        .form-excellent { color: #13ec5b; }
+        .form-good { color: #10b981; }
+        .form-average { color: #f59e0b; }
+        .form-poor { color: #f97316; }
+        .form-very-poor { color: #ef4444; }
+        
+        /* Loading spinner */
+        .loading-spinner {
+            width: 40px;
+            height: 40px;
+            border: 3px solid rgba(19, 236, 91, 0.1);
+            border-top: 3px solid #13ec5b;
+            border-radius: 50%;
+            animation: spin 1s linear infinite;
+        }
+        
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
     </style>
 </head>
 <body class="font-display bg-background-light dark:bg-background-dark text-slate-900 dark:text-white antialiased overflow-x-hidden">
@@ -278,7 +299,7 @@
                     <div>
                         <h1 class="text-2xl md:text-3xl font-bold">Soccer Match Predictor</h1>
                         <p class="text-slate-400 dark:text-slate-400 text-sm md:text-base">
-                            Upload your CSV data for statistical match predictions
+                            Advanced predictions with recent form analysis
                         </p>
                     </div>
                 </div>
@@ -292,16 +313,24 @@
     
     <div class="container mx-auto px-4 py-6">
         <!-- Navigation Section -->
-        <div class="flex gap-2 mb-8">
-            <a href="odds-analyzer.html" class="px-6 py-3 bg-surface-dark text-slate-300 font-bold rounded-lg flex items-center gap-2 border border-border-dark hover:bg-primary hover:text-background-dark transition-colors duration-300">
-                <i class="fas fa-calculator"></i>
-                Odds Analyzer
-            </a>
-            <a href="prediction.html" class="px-6 py-3 bg-primary text-background-dark font-bold rounded-lg flex items-center gap-2">
-                <i class="fas fa-futbol"></i>
-                Soccer Predictor
-            </a>
-        </div>
+    <div class="flex gap-2 mb-8">
+        <a href="odds-analyzer.html" class="px-6 py-3 bg-surface-dark text-slate-300 font-bold rounded-lg flex items-center gap-2 border border-border-dark hover:bg-primary hover:text-background-dark transition-colors duration-300">
+            <i class="fas fa-calculator"></i>
+            Odds Analyzer
+        </a>
+        <a href="prediction.html" class="px-6 py-3 bg-primary text-background-dark font-bold rounded-lg flex items-center gap-2">
+            <i class="fas fa-futbol"></i>
+            Soccer Predictor
+        </a>
+        <a href="fixtures.html" class="px-6 py-3 bg-surface-dark text-slate-300 font-bold rounded-lg flex items-center gap-2 border border-border-dark hover:bg-primary hover:text-background-dark transition-colors duration-300">
+            <i class="fas fa-calendar-alt"></i>
+            Today's Fixtures
+        </a>
+        <a href="combine-csv.html" class="px-6 py-3 bg-surface-dark text-slate-300 font-bold rounded-lg flex items-center gap-2 border border-border-dark hover:bg-primary hover:text-background-dark transition-colors duration-300">
+            <i class="fas fa-file-csv"></i>
+            CSV Combiner
+        </a>
+    </div>
         
         <div class="grid grid-cols-1 lg:grid-cols-3 gap-8">
             <!-- Left Column - Main Content -->
@@ -386,6 +415,22 @@
                                         </div>
                                     </div>
 
+                                    <div class="league-option cursor-pointer" data-league="ligue1">
+                                        <div class="league-card p-4 rounded-lg border border-gray-200 dark:border-border-dark hover:border-primary/50 transition-all duration-300">
+                                            <div class="flex items-center gap-3">
+                                                <div class="w-10 h-10 rounded-full bg-white dark:bg-background-dark flex items-center justify-center overflow-hidden border border-gray-300 dark:border-border-dark">
+                                                    <img src="https://www.thesportsdb.com/images/media/league/poster/wwzq221761291181.jpg" 
+                                                        alt="Ligue 1 Logo" class="w-full h-full object-contain p-1">
+                                                </div>
+                                                <div>
+                                                    <div class="font-bold text-slate-900 dark:text-white">Ligue 1</div>
+                                                    <div class="text-sm text-slate-600 dark:text-slate-400">18 Teams • Auto-loads on click</div>
+                                                </div>
+                                                <i class="fas fa-check league-check text-primary ml-auto" style="display: none;"></i>
+                                            </div>
+                                        </div>
+                                    </div>
+
                                     <div class="league-option cursor-pointer" data-league="custom">
                                         <div class="league-card p-4 rounded-lg border border-gray-200 dark:border-border-dark hover:border-primary/50 transition-all duration-300">
                                             <div class="flex items-center gap-3">
@@ -425,15 +470,12 @@
                     <div class="space-y-4">
                         <div class="bg-primary/10 border border-primary/20 rounded-lg p-4 text-primary text-sm">
                             <i class="fas fa-info-circle float-left mr-2 mt-0.5"></i>
-                            <strong>Required CSV Format:</strong> Your CSV file should contain team statistics for all teams.
+                            <strong>Required CSV Format:</strong> Your CSV file should contain team statistics for all teams including recent form data.
                             <div class="mt-2">
-                                <strong>Required Columns:</strong> Squad, MP, W, D, L, GF, GA, xG, xGA 
+                                <strong>Recent Form Columns:</strong> Recent_matches, Recent_wins, Recent_draws, Recent_loses, Recent_goals, Recent_ga, Recent_points, Recent_xG, Recent_xGA, RecentHome_matches, RecentHome_wins, RecentHome_xG, RecentHome_xGA, RecentAway_matches, RecentAway_wins, RecentAway_xG, RecentAway_xGA
                             </div>
                             <div class="mt-2 font-mono text-xs">
-                                Example row: "Barcelona,17,14,1,2,49,20,38.8,21.7"
-                            </div>
-                            <div class="mt-2">
-                                <strong>Note:</strong> CSV files should be in the same folder as this HTML file or uploaded directly.
+                                Recent form data includes last 5 matches performance
                             </div>
                         </div>
                         
@@ -447,7 +489,7 @@
                                     <i class="fas fa-file-csv text-4xl text-primary"></i>
                                 </div>
                                 <p class="font-bold text-slate-900 dark:text-white">Click to upload or drag and drop</p>
-                                <p class="text-slate-600 dark:text-slate-400 text-sm mt-1">Teams statistics CSV file (used for both home and away)</p>
+                                <p class="text-slate-600 dark:text-slate-400 text-sm mt-1">Teams statistics CSV file with recent form data</p>
                                 <input type="file" id="csvFile" accept=".csv" class="hidden">
                                 <div class="file-list mt-4" id="fileList"></div>
                             </div>
@@ -466,14 +508,14 @@
                 <!-- Loading Indicator Section -->
                 <div class="loading text-center py-12" id="loadingIndicator" style="display: none;">
                     <div class="loading-spinner mx-auto mb-4"></div>
-                    <p class="text-slate-600 dark:text-slate-400">Processing data...</p>
+                    <p class="text-slate-600 dark:text-slate-400">Processing data and calculating form metrics...</p>
                 </div>
                 
                 <!-- Matchup Display Section -->
                 <div class="group relative overflow-hidden rounded-2xl border border-gray-200 dark:border-border-dark bg-white dark:bg-surface-dark p-6 transition-all duration-300 hover:border-primary/50 hover:shadow-[0_0_30px_rgba(19,236,91,0.1)]" id="matchupDisplay">
                     <h2 class="text-2xl font-bold mb-6 text-slate-900 dark:text-white flex items-center gap-2">
                         <i class="fas fa-futbol text-primary"></i>
-                        Matchup Preview
+                        Matchup Preview with Form Analysis
                     </h2>
                     <div class="team-display">
                         <div class="team bg-background-light dark:bg-background-dark p-6 rounded-xl border border-gray-200 dark:border-border-dark" id="homeTeamDisplay">
@@ -512,13 +554,13 @@
                 <div id="predictionResults" class="group relative overflow-hidden rounded-2xl border border-gray-200 dark:border-border-dark bg-white dark:bg-surface-dark p-6 transition-all duration-300 hover:border-primary/50 hover:shadow-[0_0_30px_rgba(19,236,91,0.1)]" style="display: none;">
                     <h2 class="text-2xl font-bold mb-6 text-slate-900 dark:text-white flex items-center gap-2">
                         <i class="fas fa-trophy text-primary"></i>
-                        Prediction Results
+                        Prediction Results with Form Analysis
                     </h2>
                     <div id="predictionContent"></div>
                 </div>
             </div>
             
-                        <!-- Right Column - Settings Only -->
+            <!-- Right Column - Settings Only -->
             <div class="space-y-8">
                 <!-- Prediction Settings Section -->
                 <div class="group relative overflow-hidden rounded-2xl border border-gray-200 dark:border-border-dark bg-white dark:bg-surface-dark p-6 transition-all duration-300 hover:border-primary/50 hover:shadow-[0_0_30px_rgba(19,236,91,0.1)]">
@@ -632,11 +674,11 @@
                                 Model Weight
                                 <span class="ml-2 px-2 py-1 bg-primary/10 text-primary text-xs rounded">0 = betting odds only, 1 = model only</span>
                             </label>
-                            <input type="range" id="modelWeight" min="0" max="1" step="0.1" value="0.6" 
+                            <input type="range" id="modelWeight" min="0" max="1" step="0.1" value="0.5" 
                                 class="w-full h-2 bg-background-light dark:bg-background-dark rounded-lg appearance-none cursor-pointer [&::-webkit-slider-thumb]:appearance-none [&::-webkit-slider-thumb]:h-5 [&::-webkit-slider-thumb]:w-5 [&::-webkit-slider-thumb]:rounded-full [&::-webkit-slider-thumb]:bg-primary">
                             <div class="flex justify-between mt-2 text-sm text-slate-600 dark:text-slate-400">
                                 <span>Betting Odds</span>
-                                <span id="weightValue" class="font-bold text-primary">0.6</span>
+                                <span id="weightValue" class="font-bold text-primary">0.5</span>
                                 <span>Model</span>
                             </div>
                         </div>
@@ -656,11 +698,27 @@
             <div class="group relative overflow-hidden rounded-2xl border border-gray-200 dark:border-border-dark bg-white dark:bg-surface-dark p-6 transition-all duration-300 hover:border-primary/50 hover:shadow-[0_0_30px_rgba(19,236,91,0.1)]">
                 <h2 class="text-2xl font-bold mb-6 text-slate-900 dark:text-white flex items-center gap-2">
                     <i class="fas fa-chart-line text-primary"></i>
-                    Statistical Model Explanation
+                    Statistical Model with Form Analysis
                 </h2>
                 
                 <!-- Three boxes side by side -->
                 <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
+                    <!-- Form Analysis Box -->
+                    <div class="model-card bg-background-light dark:bg-background-dark p-5 rounded-xl border border-gray-200 dark:border-border-dark hover:border-primary/30 transition-all duration-300 hover:scale-[1.02]">
+                        <div class="flex items-center gap-3 mb-4">
+                            <div class="w-12 h-12 rounded-lg bg-primary/10 flex items-center justify-center">
+                                <i class="fas fa-chart-line text-primary text-xl"></i>
+                            </div>
+                            <h4 class="font-bold text-lg text-slate-900 dark:text-white">Recent Form Analysis</h4>
+                        </div>
+                        <p class="text-slate-600 dark:text-slate-400 text-sm mb-4">
+                            Analyzes last 5 matches performance including xG/xGA, results, and home/away form splits.
+                        </p>
+                        <div class="bg-primary/10 border border-primary/20 rounded-lg p-3 text-primary text-xs font-mono">
+                            <strong>Data Used:</strong> Recent_xG, Recent_xGA, Recent_wins, Home/Away splits
+                        </div>
+                    </div>
+                    
                     <!-- Poisson Distribution Box -->
                     <div class="model-card bg-background-light dark:bg-background-dark p-5 rounded-xl border border-gray-200 dark:border-border-dark hover:border-primary/30 transition-all duration-300 hover:scale-[1.02]">
                         <div class="flex items-center gap-3 mb-4">
@@ -670,7 +728,7 @@
                             <h4 class="font-bold text-lg text-slate-900 dark:text-white">Poisson Distribution</h4>
                         </div>
                         <p class="text-slate-600 dark:text-slate-400 text-sm mb-4">
-                            The model uses Poisson distribution to predict goal probabilities based on expected goals (xG) data.
+                            Uses Poisson distribution to predict goal probabilities based on expected goals (xG) data.
                         </p>
                         <div class="bg-primary/10 border border-primary/20 rounded-lg p-3 text-primary text-xs font-mono">
                             <strong>Formula:</strong> P(k goals) = (λ^k * e^-λ) / k!
@@ -692,35 +750,11 @@
                             <strong>Formula:</strong> Final = (Model × Weight) + (Betting × (1-Weight))
                         </div>
                     </div>
-                    
-                    <!-- xG Statistics Box -->
-                    <div class="model-card bg-background-light dark:bg-background-dark p-5 rounded-xl border border-gray-200 dark:border-border-dark hover:border-primary/30 transition-all duration-300 hover:scale-[1.02]">
-                        <div class="flex items-center gap-3 mb-4">
-                            <div class="w-12 h-12 rounded-lg bg-primary/10 flex items-center justify-center">
-                                <i class="fas fa-futbol text-primary text-xl"></i>
-                            </div>
-                            <h4 class="font-bold text-lg text-slate-900 dark:text-white">xG Statistics</h4>
-                        </div>
-                        <p class="text-slate-600 dark:text-slate-400 text-sm mb-4">
-                            Expected Goals (xG) measures the quality of chances. Higher xG = better scoring opportunities.
-                        </p>
-                        <div class="bg-primary/10 border border-primary/20 rounded-lg p-3 text-primary text-xs font-mono">
-                            <strong>Calculation:</strong> Home Attack + Away Defense / 2
-                        </div>
-                    </div>
                 </div>
             </div>
         </div>
     </div>
     
-    <script src="js/prediction/prediction-utils.js"></script>
-    <script src="js/prediction/prediction-file.js"></script>
-    <script src="js/prediction/prediction-data.js"></script>
-    <script src="js/prediction/prediction-stats.js"></script>
-    <script src="js/prediction/prediction-math.js"></script>
-    <script src="js/prediction/prediction-model.js"></script>
-    <script src="js/prediction/prediction-display.js"></script>
-    <script src="js/prediction/prediction-storage.js"></script>
-    <script src="js/prediction/prediction-main.js"></script>
+    <script src="js/prediction.js"></script>
 </body>
 </html>

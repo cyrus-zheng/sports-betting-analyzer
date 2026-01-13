@@ -1,4 +1,5 @@
-/* odds-analyzer.css */
+/* Odds Analyzer Styles */
+
 * {
     margin: 0;
     padding: 0;
@@ -19,7 +20,7 @@ body {
     display: flex;
     gap: 8px;
     margin-bottom: 8px;
-    margin-left: calc(150px + 12px); /* Match the outcome-name width + gap */
+    margin-left: calc(150px + 12px); 
 }
 
 /* Outcome Row Styles */
@@ -298,7 +299,6 @@ input:focus, select:focus, textarea:focus {
     color: #ffffff !important;
 }
 
-/* Ensure all dynamically added elements have proper dark mode styles */
 #analysisResults div,
 #resultsContent div,
 #analysisResults table,
@@ -311,7 +311,6 @@ input:focus, select:focus, textarea:focus {
     color: inherit !important;
 }
 
-/* Specific styles for the demo results */
 #analysisResults {
     background-color: #ffffff !important;
     color: #1e293b !important;
@@ -322,12 +321,10 @@ input:focus, select:focus, textarea:focus {
     color: #ffffff !important;
 }
 
-/* Ensure all text in demo results is properly colored */
 #resultsContent * {
     color: inherit !important;
 }
 
-/* Fix for any dynamically created cards or boxes */
 .demo-card,
 .result-card,
 .analysis-card {
@@ -397,3 +394,4 @@ td.copy-enabled:hover {
         padding: 10px 12px !important;
     }
 }
+

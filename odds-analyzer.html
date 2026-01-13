@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>SportsAI - Odds Analyzer</title>
+    <title>Odds Analyzer</title>
     
     <!-- Fonts -->
     <link href="https://fonts.googleapis.com" rel="preconnect">
@@ -80,7 +80,18 @@
                 <span class="material-symbols-outlined">sports_soccer</span>
                 Soccer Predictor
             </a>
+            
+            <a href="fixtures.html" class="px-6 py-3 bg-surface-dark text-slate-300 font-bold rounded-lg flex items-center gap-2 border border-border-dark hover:bg-primary hover:text-background-dark transition-colors duration-300">
+                <i class="fas fa-calendar-alt"></i>
+                Today's Fixtures
+            </a>
+            
+            <a href="combine-csv.html" class="px-6 py-3 bg-surface-dark text-slate-300 font-bold rounded-lg flex items-center gap-2 border border-border-dark hover:bg-primary hover:text-background-dark transition-colors duration-300">
+                <i class="fas fa-file-csv"></i>
+                CSV Combiner
+            </a>
         </div>
+    </div>
         
         <!-- Main Content -->
         <div class="grid grid-cols-1 lg:grid-cols-3 gap-8">
@@ -92,6 +103,72 @@
                         <span class="material-symbols-outlined text-primary">calculate</span>
                         Create Betting Market
                     </h2>
+
+                    <!-- API Integration Section -->
+                    <div class="mb-6">
+                        <label class="block text-slate-700 dark:text-slate-300 font-medium mb-2">
+                            <span class="material-symbols-outlined text-sm align-middle mr-1">key</span>
+                            The Odds API Key
+                            <span class="ml-2 px-2 py-1 bg-primary/10 text-primary text-xs rounded">Optional - Live Data</span>
+                        </label>
+                        <div class="flex gap-2">
+                            <input type="password" id="apiKeyInput" placeholder="Enter your API key from the-odds-api.com"
+                                class="flex-1 px-4 py-3 bg-background-light dark:bg-background-dark border border-gray-300 dark:border-border-dark rounded-lg focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent text-slate-900 dark:text-white">
+                            <button id="saveApiKeyBtn" class="px-6 py-3 bg-primary/20 text-primary rounded-lg hover:bg-primary/30 transition-colors whitespace-nowrap font-medium">
+                                Save
+                            </button>
+                        </div>
+                        <p class="text-xs text-slate-500 dark:text-slate-400 mt-1">
+                            Get your free API key at <a href="https://the-odds-api.com" target="_blank" class="text-primary hover:underline">the-odds-api.com</a> (500 free requests/month)
+                        </p>
+                    </div>
+
+                    <!-- Sport Selection (Hidden until API key is saved) -->
+                    <div id="sportSelectionContainer" style="display: none;" class="mb-4">
+                        <label class="block text-slate-700 dark:text-slate-300 font-medium mb-2">Select Sport</label>
+                        <select id="sportSelector"
+                            class="w-full px-4 py-3 bg-background-light dark:bg-background-dark border border-gray-300 dark:border-border-dark rounded-lg focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent text-slate-900 dark:text-white">
+                            <option value="">-- Select a sport --</option>
+                        </select>
+                    </div>
+
+                    <!-- Market Selection -->
+                    <div id="marketSelectionContainer" style="display: none;" class="mb-4">
+                        <label class="block text-slate-700 dark:text-slate-300 font-medium mb-2">Select Market(s)</label>
+                        <select id="marketSelector"
+                            class="w-full px-4 py-3 bg-background-light dark:bg-background-dark border border-gray-300 dark:border-border-dark rounded-lg focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent text-slate-900 dark:text-white">
+                            <option value="h2h">Moneyline (Head-to-Head)</option>
+                            <option value="spreads">Spreads</option>
+                            <option value="totals">Totals (Over/Under)</option>
+                            <option value="h2h,spreads">Moneyline + Spreads</option>
+                            <option value="h2h,totals">Moneyline + Totals</option>
+                        </select>
+                    </div>
+
+                    <!-- Event Selection (Hidden until sport is selected) -->
+                    <div id="eventSelectionContainer" style="display: none;" class="mb-4">
+                        <label class="block text-slate-700 dark:text-slate-300 font-medium mb-2">Select Game</label>
+                        <select id="eventSelector"
+                            class="w-full px-4 py-3 bg-background-light dark:bg-background-dark border border-gray-300 dark:border-border-dark rounded-lg focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent text-slate-900 dark:text-white">
+                            <option value="">-- Select a game --</option>
+                        </select>
+                    </div>
+
+                    <!-- Load from API Button -->
+                    <button id="loadFromApiBtn" class="w-full py-3 bg-primary/20 text-primary font-bold rounded-lg hover:bg-primary/30 transition-colors duration-300 flex items-center gap-2 justify-center mb-6" style="display: none;">
+                        <span class="material-symbols-outlined">cloud_download</span>
+                        Load Odds from API
+                    </button>
+
+                    <!-- Divider -->
+                    <div class="relative my-6">
+                        <div class="absolute inset-0 flex items-center">
+                            <div class="w-full border-t border-gray-300 dark:border-border-dark"></div>
+                        </div>
+                        <div class="relative flex justify-center text-sm">
+                            <span class="px-4 bg-white dark:bg-surface-dark text-slate-500 dark:text-slate-400">OR</span>
+                        </div>
+                    </div>
 
                     <!-- CSV Upload Section -->
                     <div>
@@ -271,11 +348,6 @@
         </div>
     </div>
 
-    <script src="js/odds-analyzer/odds-utils.js"></script>
-    <script src="js/odds-analyzer/odds-calculations.js"></script>
-    <script src="js/odds-analyzer/odds-ui.js"></script>
-    <script src="js/odds-analyzer/odds-display.js"></script>
-    <script src="js/odds-analyzer/odds-analysis.js"></script>
-    <script src="js/odds-analyzer/odds-analyzer.js"></script>
+    <script src="js/odds-analyzer.js"></script>
 </body>
 </html>

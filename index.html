@@ -3,7 +3,7 @@
     <head>
         <meta charset="utf-8" />
         <meta content="width=device-width, initial-scale=1.0" name="viewport" />
-        <title>SportsAI - Intelligent Sports Analytics</title>
+        <title>Intelligent Sports Analytics</title>
 
         <!-- Fonts -->
         <link href="https://fonts.googleapis.com" rel="preconnect" />
@@ -70,7 +70,7 @@
                 </div>
 
                 <!-- Feature Cards -->
-                <div class="grid grid-cols-1 md:grid-cols-2 gap-6 w-full max-w-5xl">
+                <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 w-full max-w-7xl">
                     <!-- Card 1: Odds Analyzer -->
                     <div
                         class="group relative overflow-hidden rounded-2xl border border-gray-200 dark:border-border-dark bg-white dark:bg-surface-dark p-8 md:p-10 transition-all duration-300 hover:border-primary/50 hover:shadow-[0_0_30px_rgba(19,236,91,0.1)] flex flex-col h-full min-h-[320px]"
@@ -128,6 +128,39 @@
 
                             <a class="inline-flex items-center gap-2 text-primary font-bold hover:gap-3 transition-all" href="prediction.html">
                                 View Predictions
+                                <span class="material-symbols-outlined !text-lg">arrow_forward</span>
+                            </a>
+                        </div>
+
+                        <div
+                            class="absolute bottom-0 left-0 w-full h-1/2 bg-gradient-to-t from-background-light/50 dark:from-background-dark/50 to-transparent pointer-events-none"
+                        ></div>
+                    </div>
+
+                    <!-- Card 3: Today's Fixtures -->
+                    <div
+                        class="group relative overflow-hidden rounded-2xl border border-gray-200 dark:border-border-dark bg-white dark:bg-surface-dark p-8 md:p-10 transition-all duration-300 hover:border-primary/50 hover:shadow-[0_0_30px_rgba(19,236,91,0.1)] flex flex-col h-full min-h-[320px]"
+                    >
+                        <div class="absolute top-0 right-0 p-4 opacity-10 group-hover:opacity-20 transition-opacity">
+                            <span class="material-symbols-outlined !text-[180px] text-primary">calendar_today</span>
+                        </div>
+
+                        <div class="relative z-10 flex flex-col h-full justify-between">
+                            <div>
+                                <div
+                                    class="w-14 h-14 rounded-xl bg-primary/10 flex items-center justify-center mb-6 text-primary border border-primary/20 group-hover:bg-primary group-hover:text-background-dark transition-colors duration-300"
+                                >
+                                    <span class="material-symbols-outlined !text-[32px]">event</span>
+                                </div>
+
+                                <h3 class="text-2xl font-bold mb-3 text-slate-900 dark:text-white">Today's Fixtures</h3>
+                                <p class="text-slate-500 dark:text-slate-400 text-base leading-relaxed mb-6">
+                                    View AI-powered predictions for all today's matches automatically generated from our model.
+                                </p>
+                            </div>
+
+                            <a class="inline-flex items-center gap-2 text-primary font-bold hover:gap-3 transition-all" href="fixtures.html">
+                                View Fixtures
                                 <span class="material-symbols-outlined !text-lg">arrow_forward</span>
                             </a>
                         </div>

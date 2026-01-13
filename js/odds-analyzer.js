@@ -1,11 +1,15 @@
-// Sports Betting Odds Analyzer - Main Entry Point
+// Sports Betting Odds Analyzer - Combined JavaScript File
 // =======================================================
+
+// =================================================
+// Main Entry Point (from odds-analyzer.js)
+// =================================================
 
 // Global variable to store parsed CSV data
 let csvData = null;
 let parsedMatches = null;
 
-// Bookmakers in fixed order (shared globally)
+// Bookmakers in fixed order 
 const bookmakers = ["FanDuel", "Bet365", "BetOnline", "Pinnacle"];
 
 // API Integration variables
@@ -28,98 +32,9 @@ document.addEventListener('DOMContentLoaded', () => {
     setupEventListeners();
 });
 
-// =======================================================
-// Odds Utility Functions
-// =======================================================
-
-// Parse odds input (supports American and decimal formats)
-function parseOdds(oddsStr) {
-    if (!oddsStr || oddsStr.trim() === '') {
-        return 0;
-    }
-    
-    oddsStr = oddsStr.trim();
-    
-    try {
-        // Check if it's in American format (+150, -110)
-        if (oddsStr.startsWith("+") || oddsStr.startsWith("-")) {
-            const americanOdds = parseFloat(oddsStr);
-            
-            // Convert American to decimal odds
-            if (americanOdds > 0) {
-                // Positive odds: +100 → 2.00, +200 → 3.00
-                return (americanOdds / 100.0) + 1.0;
-            } else {
-                // Negative odds: -110 → 1.909, -200 → 1.50
-                return (100.0 / Math.abs(americanOdds)) + 1.0;
-            }
-        } else {
-            // Already in decimal format (e.g., 2.50)
-            return parseFloat(oddsStr);
-        }
-    } catch (e) {
-        console.error("Error parsing odds:", oddsStr, e);
-        return 0;
-    }
-}
-
-// Convert decimal odds back to American format for display
-function formatAmericanOdds(decimalOdds) {
-    if (decimalOdds >= 2.0) {
-        // Positive American odds
-        const american = (decimalOdds - 1.0) * 100.0;
-        return "+" + Math.round(american);
-    } else if (decimalOdds > 1.0) {
-        // Negative American odds
-        const american = 100.0 / (decimalOdds - 1.0);
-        return "-" + Math.round(american);
-    } else {
-        return "N/A";
-    }
-}
-
-// =======================================================
-// Odds Calculation Functions
-// =======================================================
-
-// Calculate implied probability from decimal odds
-function calculateImpliedProbability(decimalOdds) {
-    if (decimalOdds > 0) {
-        return (1.0 / decimalOdds) * 100.0;
-    }
-    return 0.0;
-}
-
-// Calculate average odds for an outcome
-function calculateAverageOdds(outcome) {
-    let sum = 0;
-    let count = 0;
-    for (let i = 0; i < 4; i++) {
-        if (outcome.available[i]) {
-            sum += outcome.odds[i];
-            count++;
-        }
-    }
-    outcome.averageOdds = count > 0 ? sum / count : 0;
-}
-
-// Calculate best odds for an outcome
-function calculateBestOdds(outcome) {
-    let bestOdds = 0;
-    let bestIndex = -1;
-    for (let i = 0; i < 4; i++) {
-        if (outcome.available[i] && outcome.odds[i] > bestOdds) {
-            bestOdds = outcome.odds[i];
-            bestIndex = i;
-        }
-    }
-    outcome.bestOdds = bestOdds;
-    outcome.bestIndex = bestIndex;
-}
-
-// =======================================================
-// UI Event Handlers
-// =======================================================
+// =================================================
+// UI Event Handlers (from odds-ui.js)
+// =================================================
 
 // Set up all event listeners
 function setupEventListeners() {
@@ -195,9 +110,97 @@ function removeOutcomeRow(button) {
     }
 }
 
-// =======================================================
-// CSV Handling Functions
-// =======================================================
+// =================================================
+// Analysis Engine Functions (from odds-analysis.js)
+// =================================================
+
+// Run odds analysis
+function runAnalysis() {
+    const eventName = document.getElementById('eventName').value;
+    const marketType = document.getElementById('marketType').value;
+    
+    // Collect outcomes and odds
+    const outcomes = collectOutcomesData();
+    
+    // Display results
+    displayAnalysisResults(eventName, marketType, outcomes);
+}
+
+// Collect data from all outcome rows
+function collectOutcomesData() {
+    const outcomes = [];
+    
+    document.querySelectorAll('.outcome-row').forEach(row => {
+        const outcomeName = row.querySelector('.outcome-input').value;
+        const oddsInputs = row.querySelectorAll('.odds-input');
+        const outcome = {
+            name: outcomeName,
+            odds: [],
+            available: []
+        };
+        
+        for (let i = 0; i < 4; i++) {
+            const oddsValue = parseOdds(oddsInputs[i].value);
+            outcome.odds.push(oddsValue);
+            outcome.available.push(oddsValue > 0);
+        }
+        
+        // Calculate average odds
+        calculateAverageOdds(outcome);
+        
+        // Calculate best odds
+        calculateBestOdds(outcome);
+        
+        outcomes.push(outcome);
+    });
+    
+    return outcomes;
+}
+
+// Run demo analysis
+function runDemoAnalysis() {
+    // Fill with demo data
+    document.getElementById('eventName').value = "Real Madrid vs Barcelona";
+    document.getElementById('marketType').value = "Moneyline";
+    
+    // Clear and recreate outcomes for demo
+    const outcomesContainer = document.getElementById('outcomesContainer');
+    outcomesContainer.innerHTML = '';
+    
+    const demoOutcomes = [
+        { name: "Real Madrid", odds: ["+150", "+155", "+145", ""] },
+        { name: "Barcelona", odds: ["+170", "+165", "+175", "+160"] },
+        { name: "Draw", odds: ["+240", "+235", "+230", ""] }
+    ];
+    
+    demoOutcomes.forEach((outcome, idx) => {
+        const row = document.createElement('div');
+        row.className = 'outcome-row';
+        row.innerHTML = `
+            <div class="outcome-name">
+                <input type="text" class="outcome-input" placeholder="Outcome name" value="${outcome.name}">
+            </div>
+            <div class="bookmaker-odds">
+                <input type="text" class="odds-input" placeholder="+150" data-bookmaker="0" value="${outcome.odds[0]}">
+                <input type="text" class="odds-input" placeholder="-110" data-bookmaker="1" value="${outcome.odds[1]}">
+                <input type="text" class="odds-input" placeholder="2.50" data-bookmaker="2" value="${outcome.odds[2]}">
+                <input type="text" class="odds-input" placeholder="N/A" data-bookmaker="3" value="${outcome.odds[3]}">
+            </div>
+            <button class="btn btn-red remove-outcome"><i class="fas fa-trash"></i></button>
+        `;
+        outcomesContainer.appendChild(row);
+        
+        // Add event listener to remove button
+        row.querySelector('.remove-outcome').addEventListener('click', function() {
+            removeOutcomeRow(this);
+        });
+    });
+    
+    // Trigger analysis after a short delay
+    setTimeout(() => {
+        document.getElementById('analyzeBtn').click();
+    }, 300);
+}
 
 // Handle CSV file upload
 function handleCsvUpload(event) {
@@ -406,9 +409,9 @@ function clearCsvData() {
     }
 }
 
-// =======================================================
+// =================================================
 // API Integration Functions
-// =======================================================
+// =================================================
 
 // Handle saving API key
 async function handleSaveApiKey() {
@@ -748,101 +751,98 @@ function displayApiCreditsInfo() {
     }
 }
 
-// =======================================================
-// Analysis Engine Functions
-// =======================================================
+// =================================================
+// Odds Calculation Functions (from odds-calculations.js)
+// =================================================
 
-// Run odds analysis
-function runAnalysis() {
-    const eventName = document.getElementById('eventName').value;
-    const marketType = document.getElementById('marketType').value;
-    
-    // Collect outcomes and odds
-    const outcomes = collectOutcomesData();
-    
-    // Display results
-    displayAnalysisResults(eventName, marketType, outcomes);
+// Calculate implied probability from decimal odds
+function calculateImpliedProbability(decimalOdds) {
+    if (decimalOdds > 0) {
+        return (1.0 / decimalOdds) * 100.0;
+    }
+    return 0.0;
 }
 
-// Collect data from all outcome rows
-function collectOutcomesData() {
-    const outcomes = [];
-    
-    document.querySelectorAll('.outcome-row').forEach(row => {
-        const outcomeName = row.querySelector('.outcome-input').value;
-        const oddsInputs = row.querySelectorAll('.odds-input');
-        const outcome = {
-            name: outcomeName,
-            odds: [],
-            available: []
-        };
-        
-        for (let i = 0; i < 4; i++) {
-            const oddsValue = parseOdds(oddsInputs[i].value);
-            outcome.odds.push(oddsValue);
-            outcome.available.push(oddsValue > 0);
+// Calculate average odds for an outcome
+function calculateAverageOdds(outcome) {
+    let sum = 0;
+    let count = 0;
+    for (let i = 0; i < 4; i++) {
+        if (outcome.available[i]) {
+            sum += outcome.odds[i];
+            count++;
         }
-        
-        // Calculate average odds
-        calculateAverageOdds(outcome);
-        
-        // Calculate best odds
-        calculateBestOdds(outcome);
-        
-        outcomes.push(outcome);
-    });
-    
-    return outcomes;
+    }
+    outcome.averageOdds = count > 0 ? sum / count : 0;
 }
 
-// Run demo analysis
-function runDemoAnalysis() {
-    // Fill with demo data
-    document.getElementById('eventName').value = "Real Madrid vs Barcelona";
-    document.getElementById('marketType').value = "Moneyline";
-    
-    // Clear and recreate outcomes for demo
-    const outcomesContainer = document.getElementById('outcomesContainer');
-    outcomesContainer.innerHTML = '';
-    
-    const demoOutcomes = [
-        { name: "Real Madrid", odds: ["+150", "+155", "+145", ""] },
-        { name: "Barcelona", odds: ["+170", "+165", "+175", "+160"] },
-        { name: "Draw", odds: ["+240", "+235", "+230", ""] }
-    ];
-    
-    demoOutcomes.forEach((outcome, idx) => {
-        const row = document.createElement('div');
-        row.className = 'outcome-row';
-        row.innerHTML = `
-            <div class="outcome-name">
-                <input type="text" class="outcome-input" placeholder="Outcome name" value="${outcome.name}">
-            </div>
-            <div class="bookmaker-odds">
-                <input type="text" class="odds-input" placeholder="+150" data-bookmaker="0" value="${outcome.odds[0]}">
-                <input type="text" class="odds-input" placeholder="-110" data-bookmaker="1" value="${outcome.odds[1]}">
-                <input type="text" class="odds-input" placeholder="2.50" data-bookmaker="2" value="${outcome.odds[2]}">
-                <input type="text" class="odds-input" placeholder="N/A" data-bookmaker="3" value="${outcome.odds[3]}">
-            </div>
-            <button class="btn btn-red remove-outcome"><i class="fas fa-trash"></i></button>
-        `;
-        outcomesContainer.appendChild(row);
-        
-        // Add event listener to remove button
-        row.querySelector('.remove-outcome').addEventListener('click', function() {
-            removeOutcomeRow(this);
-        });
-    });
-    
-    // Trigger analysis after a short delay
-    setTimeout(() => {
-        document.getElementById('analyzeBtn').click();
-    }, 300);
+// Calculate best odds for an outcome
+function calculateBestOdds(outcome) {
+    let bestOdds = 0;
+    let bestIndex = -1;
+    for (let i = 0; i < 4; i++) {
+        if (outcome.available[i] && outcome.odds[i] > bestOdds) {
+            bestOdds = outcome.odds[i];
+            bestIndex = i;
+        }
+    }
+    outcome.bestOdds = bestOdds;
+    outcome.bestIndex = bestIndex;
 }
 
-// =======================================================
-// Results Display Functions
-// =======================================================
+// =================================================
+// Odds Utility Functions (from odds-utils.js)
+// =================================================
+
+// Parse odds input (supports American and decimal formats)
+function parseOdds(oddsStr) {
+    if (!oddsStr || oddsStr.trim() === '') {
+        return 0;
+    }
+    
+    oddsStr = oddsStr.trim();
+    
+    try {
+        // Check if it's in American format (+150, -110)
+        if (oddsStr.startsWith("+") || oddsStr.startsWith("-")) {
+            const americanOdds = parseFloat(oddsStr);
+            
+            // Convert American to decimal odds
+            if (americanOdds > 0) {
+                // Positive odds: +100 → 2.00, +200 → 3.00
+                return (americanOdds / 100.0) + 1.0;
+            } else {
+                // Negative odds: -110 → 1.909, -200 → 1.50
+                return (100.0 / Math.abs(americanOdds)) + 1.0;
+            }
+        } else {
+            // Already in decimal format (e.g., 2.50)
+            return parseFloat(oddsStr);
+        }
+    } catch (e) {
+        console.error("Error parsing odds:", oddsStr, e);
+        return 0;
+    }
+}
+
+// Convert decimal odds back to American format for display
+function formatAmericanOdds(decimalOdds) {
+    if (decimalOdds >= 2.0) {
+        // Positive American odds
+        const american = (decimalOdds - 1.0) * 100.0;
+        return "+" + Math.round(american);
+    } else if (decimalOdds > 1.0) {
+        // Negative American odds
+        const american = 100.0 / (decimalOdds - 1.0);
+        return "-" + Math.round(american);
+    } else {
+        return "N/A";
+    }
+}
+
+// =================================================
+// Results Display Functions (from odds-display.js)
+// =================================================
 
 // Display analysis results
 function displayAnalysisResults(eventName, marketType, outcomes) {

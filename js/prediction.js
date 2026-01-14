@@ -1099,7 +1099,7 @@ function displayOrganizedPredictionResults(
         
         if (valueBet) {
             html += `
-                <p><span style="color: #13ec5b; font-weight: 600;">Ã¢Å“â€œ Value Bet Detected:</span> 
+                <p><span style="color: #13ec5b; font-weight: 600;">Value Bet Detected:</span> 
                 Model suggests ${valueBet} offers positive expected value.</p>
             `;
         } else {
